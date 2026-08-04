@@ -4,58 +4,47 @@
 const COMPOSERS_DB = [
     {
         name: 'Пётр Ильич Чайковский',
-        audioSrc: 'audio/chaikovsky_oktabr.mp3',
-        previewStart: 0
+        audioSrc: 'audio/chaikovsky_oktabr.mp3'
     },
     {
         name: 'Пётр Ильич Чайковский',
-        audioSrc: 'audio/chaikovsky_razmyshlenie.MP3',
-        previewStart: 0
+        audioSrc: 'audio/chaikovsky_razmyshlenie.mp3'
     },
     {
         name: 'Евгений Дмитриевич Дога',
-        audioSrc: 'audio/doga_grammofon.mp3',
-        previewStart: 0
+        audioSrc: 'audio/doga_grammofon.mp3'
     },
     {
         name: 'Людовико Эйнауди',
-        audioSrc: 'audio/einaudi_experience.mp3',
-        previewStart: 0
+        audioSrc: 'audio/einaudi_experience.mp3'
     },
     {
         name: 'Ференц Лист',
-        audioSrc: 'audio/list_grezylubvi.mp3',
-        previewStart: 0
+        audioSrc: 'audio/list_grezylubvi.mp3'
     },
     {
         name: 'Сергей Васильевич Рахманинов',
-        audioSrc: 'audio/rahmaninoff_concert2.mp3',
-        previewStart: 0
+        audioSrc: 'audio/rahmaninoff_concert2.mp3'
     },
     {
         name: 'Сергей Васильевич Рахманинов',
-        audioSrc: 'audio/rahmaninoff_preludedodiezminor.MP3',
-        previewStart: 0
+        audioSrc: 'audio/rahmaninoff_preludedodiezminor.mp3'
     },
     {
         name: 'Альфред Гарриевич Шнитке',
-        audioSrc: 'audio/shnitke_lesskazok.mp3',
-        previewStart: 0
+        audioSrc: 'audio/shnitke_lesskazok.mp3'
     },
     {
         name: 'Альфред Гарриевич Шнитке',
-        audioSrc: 'audio/shnitke_polkamertvyedushi.mp3',
-        previewStart: 0
+        audioSrc: 'audio/shnitke_polkamertvyedushi.mp3'
     },
     {
         name: 'Дмитрий Дмитриевич Шостакович',
-        audioSrc: 'audio/shostakovich_prelude5remajor.mp3',
-        previewStart: 0
+        audioSrc: 'audio/shostakovich_prelude5remajor.mp3'
     },
     {
         name: 'Георгий Васильевич Свиридов',
-        audioSrc: 'audio/sviridiv_metel.mp3',
-        previewStart: 0
+        audioSrc: 'audio/sviridiv_metel.mp3'
     }
 ];
 
@@ -71,10 +60,7 @@ let state = {
     isAnswered: false,
     isPlaying: false,
     audioElement: null,
-    audioContext: null,
-    analyser: null,
     animationId: null,
-    currentMelody: null,
 };
 
 // DOM-элементы
@@ -95,7 +81,7 @@ const resultTitle = $('resultTitle');
 const resultDetail = $('resultDetail');
 
 // ============================================================
-//  ГЕНЕРАЦИЯ ВОПРОСОВ
+//  ГЕНЕРАЦИЯ ВОПРОСОВ (исправленная)
 // ============================================================
 function generateQuestions() {
     const shuffled = [...COMPOSERS_DB];
@@ -108,167 +94,81 @@ function generateQuestions() {
 
     return selected.map((composer) => {
         const others = COMPOSERS_DB.filter(c => c.name !== composer.name);
-        let wrong = others.length > 0 
-            ? others[Math.floor(Math.random() * others.length)] 
-            : COMPOSERS_DB[0];
-        
-        if (wrong.name === composer.name) {
-            wrong = COMPOSERS_DB.find(c => c.name !== composer.name) || COMPOSERS_DB[0];
+        const shuffledOthers = [...others];
+        for (let i = shuffledOthers.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledOthers[i], shuffledOthers[j]] = [shuffledOthers[j], shuffledOthers[i]];
         }
+        const wrong = shuffledOthers[0] || COMPOSERS_DB[0];
 
-        const correctIndex = Math.random() < 0.5 ? 0 : 1;
+        const correctPosition = Math.random() < 0.5 ? 0 : 1;
         const options = [
-            { name: composer.name, isCorrect: correctIndex === 0 },
-            { name: wrong.name, isCorrect: correctIndex === 1 }
+            { name: composer.name, isCorrect: correctPosition === 0 },
+            { name: wrong.name, isCorrect: correctPosition === 1 }
         ];
-        
-        if (correctIndex === 1) {
-            options[0].isCorrect = false;
-            options[1].isCorrect = true;
-        } else {
-            options[0].isCorrect = true;
-            options[1].isCorrect = false;
-        }
 
         return {
             composer: composer,
             options: options,
-            correctIndex: correctIndex,
+            correctIndex: correctPosition
         };
     });
 }
 
 // ============================================================
-//  ПРОИГРЫВАНИЕ АУДИО С ВИЗУАЛИЗАЦИЕЙ РАМКИ (исправленная версия)
+//  ВОСПРОИЗВЕДЕНИЕ АУДИО
 // ============================================================
 function playMelody(composer, onComplete) {
-    console.log('Попытка воспроизведения:', composer.audioSrc);
-    console.log('Полный путь:', window.location.href + composer.audioSrc);
+    console.log('▶ Воспроизведение:', composer.name);
     
-    if (state.isPlaying) {
-        stopAudio();
+    if (state.audioElement) {
+        state.audioElement.pause();
+        state.audioElement = null;
+    }
+    
+    if (state.animationId) {
+        cancelAnimationFrame(state.animationId);
+        state.animationId = null;
     }
 
-    // Прямое воспроизведение без проверки fetch (может блокироваться CORS)
     try {
-        const audio = new Audio();
-        audio.src = composer.audioSrc;
-        audio.crossOrigin = 'anonymous';
+        const audio = new Audio(composer.audioSrc);
         
-        // Обработчики событий
         audio.addEventListener('canplaythrough', function() {
-            console.log('Аудио загружено, начинаем воспроизведение');
-            startAudioPlayback(audio, composer, onComplete);
-        });
-
-        audio.addEventListener('error', function(e) {
-            console.warn('Ошибка загрузки аудио:', e);
-            console.log('Тип ошибки:', audio.error ? audio.error.code : 'unknown');
-            
-            // Пробуем альтернативный путь (с расширением .mp3 в нижнем регистре)
-            if (composer.audioSrc.toUpperCase().endsWith('.MP3')) {
-                const altPath = composer.audioSrc.replace(/\.MP3$/i, '.mp3');
-                console.log('Пробуем альтернативный путь:', altPath);
-                audio.src = altPath;
-                audio.load();
-                return;
-            }
-            
-            // Если ничего не помогает, показываем ошибку
-            showErrorMessage('Не удалось загрузить аудио: ' + composer.audioSrc);
-            // Всё равно запускаем визуализацию без звука
-            startVisualizationOnly(composer, onComplete);
-        });
-
-        // Начинаем загрузку
-        audio.load();
-        console.log('Загрузка аудио начата');
-
-    } catch (e) {
-        console.error('Ошибка при создании аудио:', e);
-        showErrorMessage('Ошибка: ' + e.message);
-        // Запускаем визуализацию без звука
-        startVisualizationOnly(composer, onComplete);
-    }
-}
-
-function startAudioPlayback(audio, composer, onComplete) {
-    try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        
-        if (audioContext.state === 'suspended') {
-            audioContext.resume().catch(err => {
-                console.warn('Не удалось возобновить AudioContext:', err);
+            audio.play().then(() => {
+                state.isPlaying = true;
+                state.audioElement = audio;
+                startPulseAnimation();
+            }).catch(err => {
+                console.warn('Ошибка воспроизведения:', err);
+                state.isPlaying = true;
+                startPulseAnimation();
             });
-        }
+        });
         
-        const source = audioContext.createMediaElementSource(audio);
-        const analyser = audioContext.createAnalyser();
-        analyser.fftSize = 256;
-        source.connect(analyser);
-        analyser.connect(audioContext.destination);
-
-        state.audioElement = audio;
-        state.audioContext = audioContext;
-        state.analyser = analyser;
-        state.isPlaying = true;
-        state.currentMelody = composer;
-
-        audio.currentTime = composer.previewStart || 0;
-
-        function updatePulseRing() {
-            if (!state.isPlaying || !state.analyser) {
-                return;
-            }
-
-            try {
-                const dataArray = new Uint8Array(state.analyser.frequencyBinCount);
-                state.analyser.getByteFrequencyData(dataArray);
-
-                let sum = 0;
-                for (let i = 0; i < dataArray.length; i++) {
-                    sum += dataArray[i];
-                }
-                const average = sum / dataArray.length;
-                const intensity = average / 255;
-
-                updatePulseRingIntensity(intensity);
-
-            } catch (e) {
-                // Игнорируем ошибки визуализации
-            }
-
-            state.animationId = requestAnimationFrame(updatePulseRing);
-        }
-
-        audio.play().then(() => {
-            console.log('Воспроизведение начато успешно');
-            updatePulseRing();
-        }).catch(err => {
-            console.warn('Ошибка воспроизведения:', err);
-            showErrorMessage('Ошибка воспроизведения: ' + err.message);
-            // Запускаем визуализацию без звука
-            startVisualizationOnly(composer, onComplete);
+        audio.addEventListener('error', function(e) {
+            console.warn('Ошибка загрузки аудио:', composer.audioSrc);
+            state.isPlaying = true;
+            startPulseAnimation();
         });
-
-        audio.addEventListener('ended', function() {
-            console.log('Аудио завершено');
-            // Не останавливаем, пусть играет по кругу
-        });
-
+        
+        audio.load();
+        
     } catch (e) {
-        console.error('Ошибка при настройке аудио:', e);
-        showErrorMessage('Ошибка: ' + e.message);
-        startVisualizationOnly(composer, onComplete);
+        console.warn('Ошибка:', e);
+        state.isPlaying = true;
+        startPulseAnimation();
     }
 }
 
-function startVisualizationOnly(composer, onComplete) {
-    console.log('Запускаем визуализацию без звука для:', composer.name);
-    state.isPlaying = true;
-    state.currentMelody = composer;
+// ============================================================
+//  АНИМАЦИЯ ПУЛЬСАЦИИ
+// ============================================================
+function startPulseAnimation() {
+    if (state.animationId) {
+        cancelAnimationFrame(state.animationId);
+    }
     
-    // Имитация пульсации без звука
     let startTime = Date.now();
     
     function animatePulse() {
@@ -277,11 +177,9 @@ function startVisualizationOnly(composer, onComplete) {
         }
         
         const elapsed = (Date.now() - startTime) / 1000;
-        // Медленная пульсация с частотой ~1 Гц
-        const intensity = 0.3 + 0.3 * Math.sin(elapsed * 2);
+        const intensity = 0.2 + 0.6 * (0.5 + 0.5 * Math.sin(elapsed * 4));
         
         updatePulseRingIntensity(intensity);
-        
         state.animationId = requestAnimationFrame(animatePulse);
     }
     
@@ -291,7 +189,6 @@ function startVisualizationOnly(composer, onComplete) {
 function updatePulseRingIntensity(intensity) {
     pulseRing.classList.add('active');
     
-    // Определяем класс в зависимости от интенсивности
     if (intensity > 0.7) {
         pulseRing.className = 'pulse-ring intense';
     } else if (intensity > 0.4) {
@@ -319,18 +216,11 @@ function updatePulseRingIntensity(intensity) {
     ')';
 }
 
-function showErrorMessage(text) {
-    feedback.textContent = '⚠ ' + text;
-    feedback.className = 'feedback wrong';
-    console.error(text);
-}
-
 function stopAudio() {
     state.isPlaying = false;
     
     if (state.audioElement) {
         state.audioElement.pause();
-        state.audioElement.currentTime = 0;
         state.audioElement = null;
     }
 
@@ -338,15 +228,7 @@ function stopAudio() {
         cancelAnimationFrame(state.animationId);
         state.animationId = null;
     }
-
-    if (state.audioContext && state.audioContext.state !== 'closed') {
-        try { state.audioContext.close(); } catch (e) {}
-        state.audioContext = null;
-    }
-
-    state.analyser = null;
     
-    // Сбрасываем рамку
     pulseRing.className = 'pulse-ring';
     pulseRing.style.borderColor = 'rgba(41, 128, 255, 0.05)';
     pulseRing.style.boxShadow = 'inset 0 0 30px rgba(41, 128, 255, 0), 0 0 30px rgba(41, 128, 255, 0)';
@@ -377,11 +259,8 @@ function loadQuestion(index) {
 
     trackInfo.textContent = 'Отрывок произведения';
 
-    // Запускаем музыку
     setTimeout(() => {
-        playMelody(q.composer, () => {
-            console.log('Музыка завершилась, ждём ответа');
-        });
+        playMelody(q.composer);
     }, 300);
 }
 
