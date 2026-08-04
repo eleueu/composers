@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Угадай композитора</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container" id="app">
+        <!-- Пульсирующая рамка по внутреннему краю -->
+        <div class="pulse-ring" id="pulseRing"></div>
+
+        <div class="game-content">
+            <!-- Счётчик -->
+            <div class="score-header">
+                <span class="score-label">Счёт: <span id="scoreDisplay">0</span></span>
+            </div>
+
+            <!-- Стартовый экран -->
+            <div class="start-screen" id="startScreen">
+                <h1>Угадай</h1>
+                <h1 class="subtitle">композитора</h1>
+                <p>Слушайте отрывок и выбирайте<br>автора произведения</p>
+                <button class="btn-start" id="btnStart">Начать игру</button>
+            </div>
+
+            <!-- Игровой экран -->
+            <div class="game-screen" id="gameScreen">
+                <div class="track-info" id="trackInfo">Отрывок произведения</div>
+
+                <div class="options" id="optionsContainer">
+                    <button class="btn-option" data-index="0">Композитор А</button>
+                    <button class="btn-option" data-index="1">Композитор Б</button>
+                </div>
+
+                <div class="feedback" id="feedback"></div>
+                <button class="btn-next" id="btnNext">Следующий вопрос</button>
+            </div>
+
+            <!-- Экран результата -->
+            <div class="result-screen" id="resultScreen">
+                <div class="final-score" id="finalScore">0/5</div>
+                <h2 id="resultTitle">Отлично!</h2>
+                <div class="detail" id="resultDetail">Огромный и чудесный мир музыки ждёт Вас!</div>
+                <button class="btn-restart" id="btnRestart">Играть снова</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
