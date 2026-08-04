@@ -447,3 +447,17 @@ body {
         font-size: 42px;
     }
 }
+
+/* ============================================================
+   НАЗВАНИЕ ПРОИЗВЕДЕНИЯ (под кнопками)
+   ============================================================ */
+.work-title {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 18px;
+    font-weight: 500;
+    color: #1a1a2e;
+    min-height: 30px;
+    font-style: italic;
+    letter-spacing: 0.3px;
+}

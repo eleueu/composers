@@ -2,7 +2,6 @@
 //  БАЗА ДАННЫХ
 // ============================================================
 
-// 1. Уникальные композиторы (для списка)
 const COMPOSERS = [
     'Пётр Ильич Чайковский',
     'Евгений Дмитриевич Дога',
@@ -14,7 +13,6 @@ const COMPOSERS = [
     'Георгий Васильевич Свиридов'
 ];
 
-// 2. Произведения (связь: файл → композитор + название)
 const WORKS = [
     {
         composer: 'Пётр Ильич Чайковский',
@@ -93,9 +91,7 @@ const startScreen = $('startScreen');
 const gameScreen = $('gameScreen');
 const resultScreen = $('resultScreen');
 const scoreDisplay = $('scoreDisplay');
-const trackInfo = $('trackInfo');
 const optionsContainer = $('optionsContainer');
-const feedback = $('feedback');
 const btnNext = $('btnNext');
 const btnStart = $('btnStart');
 const btnRestart = $('btnRestart');
@@ -103,6 +99,7 @@ const pulseRing = $('pulseRing');
 const finalScore = $('finalScore');
 const resultTitle = $('resultTitle');
 const resultDetail = $('resultDetail');
+const workTitle = $('workTitle');
 
 // ============================================================
 //  ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
@@ -283,14 +280,10 @@ function loadQuestion(index) {
     }
 
     state.isAnswered = false;
-    feedback.textContent = '';
-    feedback.className = 'feedback';
+    workTitle.textContent = '';          // Очищаем название произведения
     btnNext.style.display = 'none';
 
     scoreDisplay.textContent = state.score;
-
-    // Ничего не показываем в треке во время вопроса
-    trackInfo.textContent = '';
 
     const btns = optionsContainer.querySelectorAll('.btn-option');
     btns.forEach((btn, i) => {
@@ -334,19 +327,13 @@ function handleOptionClick(e) {
         }
     });
 
-    // ПОСЛЕ ОТВЕТА показываем название произведения и композитора
+    // ПОСЛЕ ОТВЕТА: показываем название произведения ПОД КНОПКАМИ
     const currentWork = state.questions[state.currentIndex].work;
-    trackInfo.textContent = currentWork.title + ' — ' + currentWork.composer;
+    workTitle.textContent = currentWork.title + ' — ' + currentWork.composer;
 
     if (isCorrect) {
         state.score += 1;
         scoreDisplay.textContent = state.score;
-        feedback.textContent = 'Правильно! Отлично!';
-        feedback.className = 'feedback correct';
-    } else {
-        const correctName = state.questions[state.currentIndex].options.find(o => o.isCorrect === true).name;
-        feedback.textContent = 'Неверно. Правильный ответ: ' + correctName;
-        feedback.className = 'feedback wrong';
     }
 
     if (state.currentIndex < state.questions.length - 1) {
@@ -410,8 +397,7 @@ function resetGame() {
     state.questions = generateQuestions();
 
     scoreDisplay.textContent = '0';
-    feedback.textContent = '';
-    feedback.className = 'feedback';
+    workTitle.textContent = '';
     btnNext.style.display = 'none';
 
     startScreen.style.display = 'flex';
