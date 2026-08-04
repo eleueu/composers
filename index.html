@@ -23,9 +23,15 @@
             </div>
 
             <div class="game-screen" id="gameScreen">
-                <div class="game-controls">
-                    <button class="btn-pause" id="btnPause">Пауза</button>
-                    <button class="btn-exit" id="btnExit">Выйти</button>
+                <!-- Верхняя панель: слева кнопки, справа счёт -->
+                <div class="game-header">
+                    <div class="game-controls">
+                        <button class="btn-pause" id="btnPause">Пауза</button>
+                        <button class="btn-exit" id="btnExit">Выйти</button>
+                    </div>
+                    <div class="score-header">
+                        <span class="score-label">Счёт: <span id="scoreDisplay">0</span></span>
+                    </div>
                 </div>
 
                 <div class="options" id="optionsContainer">
