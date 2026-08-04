@@ -60,6 +60,8 @@ let state = {
     isAnswered: false,
     isPlaying: false,
     audioElement: null,
+    audioContext: null,
+    sourceNode: null,
     animationId: null,
 };
 
@@ -81,7 +83,7 @@ const resultTitle = $('resultTitle');
 const resultDetail = $('resultDetail');
 
 // ============================================================
-//  ГЕНЕРАЦИЯ ВОПРОСОВ (исправленная)
+//  ГЕНЕРАЦИЯ ВОПРОСОВ
 // ============================================================
 function generateQuestions() {
     const shuffled = [...COMPOSERS_DB];
@@ -116,47 +118,104 @@ function generateQuestions() {
 }
 
 // ============================================================
-//  ВОСПРОИЗВЕДЕНИЕ АУДИО
+//  ПОЛНАЯ ОСТАНОВКА АУДИО
 // ============================================================
-function playMelody(composer, onComplete) {
-    console.log('▶ Воспроизведение:', composer.name);
+function stopAudio() {
+    state.isPlaying = false;
     
-    if (state.audioElement) {
-        state.audioElement.pause();
-        state.audioElement = null;
-    }
-    
+    // Останавливаем анимацию
     if (state.animationId) {
         cancelAnimationFrame(state.animationId);
         state.animationId = null;
     }
+    
+    // Останавливаем аудио и очищаем
+    if (state.audioElement) {
+        try {
+            state.audioElement.pause();
+            state.audioElement.currentTime = 0;
+            state.audioElement.src = ''; // Очищаем src
+        } catch (e) {
+            console.warn('Ошибка при остановке аудио:', e);
+        }
+        state.audioElement = null;
+    }
+    
+    // Закрываем AudioContext, если он есть
+    if (state.audioContext && state.audioContext.state !== 'closed') {
+        try {
+            state.audioContext.close();
+        } catch (e) {
+            console.warn('Ошибка при закрытии AudioContext:', e);
+        }
+        state.audioContext = null;
+    }
+    
+    state.sourceNode = null;
+    
+    // Сбрасываем рамку
+    pulseRing.className = 'pulse-ring';
+    pulseRing.style.borderColor = 'rgba(41, 128, 255, 0.05)';
+    pulseRing.style.boxShadow = 'inset 0 0 30px rgba(41, 128, 255, 0), 0 0 30px rgba(41, 128, 255, 0)';
+    pulseRing.style.background = 'transparent';
+}
 
+// ============================================================
+//  ПРОИГРЫВАНИЕ АУДИО (исправленная версия)
+// ============================================================
+function playMelody(composer) {
+    console.log('▶ Воспроизведение:', composer.name);
+    
+    // Полная остановка всего старого аудио
+    stopAudio();
+    
     try {
+        // Создаём новый аудиоэлемент
         const audio = new Audio(composer.audioSrc);
+        audio.crossOrigin = 'anonymous';
         
-        audio.addEventListener('canplaythrough', function() {
+        // Создаём новый AudioContext
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Создаём новый MediaElementSource
+        const source = audioContext.createMediaElementSource(audio);
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 256;
+        source.connect(analyser);
+        analyser.connect(audioContext.destination);
+        
+        // Сохраняем в состояние
+        state.audioElement = audio;
+        state.audioContext = audioContext;
+        state.sourceNode = source;
+        state.analyser = analyser;
+        state.isPlaying = true;
+        
+        // Обработчик начала воспроизведения
+        audio.addEventListener('canplaythrough', function onCanPlay() {
+            audio.removeEventListener('canplaythrough', onCanPlay);
             audio.play().then(() => {
-                state.isPlaying = true;
-                state.audioElement = audio;
+                console.log('✅ Воспроизведение начато');
                 startPulseAnimation();
             }).catch(err => {
-                console.warn('Ошибка воспроизведения:', err);
-                state.isPlaying = true;
-                startPulseAnimation();
+                console.warn('❌ Ошибка воспроизведения:', err);
+                state.isPlaying = false;
             });
         });
         
         audio.addEventListener('error', function(e) {
-            console.warn('Ошибка загрузки аудио:', composer.audioSrc);
-            state.isPlaying = true;
+            console.warn('❌ Ошибка загрузки аудио:', composer.audioSrc);
+            state.isPlaying = false;
+            // Запускаем анимацию без звука
             startPulseAnimation();
         });
         
+        // Начинаем загрузку
         audio.load();
         
     } catch (e) {
-        console.warn('Ошибка:', e);
-        state.isPlaying = true;
+        console.error('❌ Критическая ошибка:', e);
+        state.isPlaying = false;
         startPulseAnimation();
     }
 }
@@ -173,13 +232,42 @@ function startPulseAnimation() {
     
     function animatePulse() {
         if (!state.isPlaying) {
+            // Если нет звука, делаем плавную пульсацию
+            const elapsed = (Date.now() - startTime) / 1000;
+            const intensity = 0.2 + 0.3 * (0.5 + 0.5 * Math.sin(elapsed * 2));
+            updatePulseRingIntensity(intensity);
+            state.animationId = requestAnimationFrame(animatePulse);
             return;
         }
         
-        const elapsed = (Date.now() - startTime) / 1000;
-        const intensity = 0.2 + 0.6 * (0.5 + 0.5 * Math.sin(elapsed * 4));
+        // Если есть звук, используем данные из анализатора
+        if (state.analyser) {
+            try {
+                const dataArray = new Uint8Array(state.analyser.frequencyBinCount);
+                state.analyser.getByteFrequencyData(dataArray);
+                
+                let sum = 0;
+                for (let i = 0; i < dataArray.length; i++) {
+                    sum += dataArray[i];
+                }
+                const average = sum / dataArray.length;
+                const intensity = average / 255;
+                
+                updatePulseRingIntensity(intensity);
+                
+            } catch (e) {
+                // Если ошибка, делаем плавную пульсацию
+                const elapsed = (Date.now() - startTime) / 1000;
+                const intensity = 0.2 + 0.3 * (0.5 + 0.5 * Math.sin(elapsed * 2));
+                updatePulseRingIntensity(intensity);
+            }
+        } else {
+            // Если нет анализатора, делаем плавную пульсацию
+            const elapsed = (Date.now() - startTime) / 1000;
+            const intensity = 0.2 + 0.3 * (0.5 + 0.5 * Math.sin(elapsed * 2));
+            updatePulseRingIntensity(intensity);
+        }
         
-        updatePulseRingIntensity(intensity);
         state.animationId = requestAnimationFrame(animatePulse);
     }
     
@@ -214,25 +302,6 @@ function updatePulseRingIntensity(intensity) {
         'rgba(41, 128, 255, ' + (alpha * 0.5) + ') 40%, ' +
         'transparent 70%' +
     ')';
-}
-
-function stopAudio() {
-    state.isPlaying = false;
-    
-    if (state.audioElement) {
-        state.audioElement.pause();
-        state.audioElement = null;
-    }
-
-    if (state.animationId) {
-        cancelAnimationFrame(state.animationId);
-        state.animationId = null;
-    }
-    
-    pulseRing.className = 'pulse-ring';
-    pulseRing.style.borderColor = 'rgba(41, 128, 255, 0.05)';
-    pulseRing.style.boxShadow = 'inset 0 0 30px rgba(41, 128, 255, 0), 0 0 30px rgba(41, 128, 255, 0)';
-    pulseRing.style.background = 'transparent';
 }
 
 // ============================================================
