@@ -28,7 +28,7 @@ const WORKS = [
     },
     {
         composer: 'Евгений Дмитриевич Дога',
-        title: 'Вальс «Граммофон»)',
+        title: 'Вальс «Граммофон»',
         file: 'doga_grammofon.mp3'
     },
     {
@@ -69,7 +69,7 @@ const WORKS = [
     {
         composer: 'Георгий Васильевич Свиридов',
         title: 'Вальс из кинофильма «Метель»',
-        file: 'sviridiv_metel.mp3'
+        file: 'sviridov_metel.mp3'
     }
 ];
 
