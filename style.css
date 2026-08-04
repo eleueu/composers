@@ -42,25 +42,32 @@
     box-sizing: border-box;
 }
 
+html, body {
+    height: 100%;
+    overflow: hidden; /* Убираем скролл */
+}
+
 body {
     font-family: 'CMU Serif', 'Times New Roman', serif;
     background: #f5f0e8;
-    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 8px;
+    padding: 0;
     margin: 0;
+    height: 100vh;
+    height: 100dvh; /* Для мобильных браузеров */
 }
 
 .game-container {
     background: #ffffff;
-    border-radius: 32px;
-    padding: 28px 24px 32px;
-    max-width: 440px;
+    border-radius: 0;
+    padding: 20px 16px 24px;
+    max-width: 100%;
     width: 100%;
-    min-height: 500px;
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+    height: 100vh;
+    height: 100dvh; /* Для мобильных браузеров */
+    box-shadow: none;
     position: relative;
     overflow: hidden;
     display: flex;
@@ -72,8 +79,8 @@ body {
    ============================================================ */
 .pulse-ring {
     position: absolute;
-    inset: 8px;
-    border-radius: 24px;
+    inset: 6px;
+    border-radius: 16px;
     border: 3px solid rgba(41, 128, 255, 0.05);
     pointer-events: none;
     transition: all 0.03s ease-out;
@@ -137,6 +144,7 @@ body {
     display: flex;
     flex-direction: column;
     flex: 1;
+    height: 100%;
 }
 
 /* ============================================================
@@ -148,11 +156,11 @@ body {
     align-items: center;
     justify-content: center;
     flex: 1;
-    padding: 20px 0;
+    padding: 10px 0;
 }
 
 .start-screen h1 {
-    font-size: 36px;
+    font-size: 38px;
     font-weight: bold;
     color: #1a1a2e;
     letter-spacing: 1px;
@@ -162,13 +170,13 @@ body {
     font-weight: normal;
     color: #2d6bb8;
     margin-top: -6px;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
 .start-quote {
     color: #7a7a7a;
-    font-size: 16px;
-    margin: 4px 0 32px 0;
+    font-size: 17px;
+    margin: 4px 0 28px 0;
     text-align: center;
     line-height: 1.6;
     font-style: italic;
@@ -207,7 +215,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     flex-shrink: 0;
 }
 
@@ -293,7 +301,8 @@ body {
     display: none;
     flex-direction: column;
     flex: 1;
-    /* justify-content: center; ← УБРАНО! */
+    justify-content: center;
+    padding: 0;
 }
 
 /* Кнопки вариантов */
@@ -301,9 +310,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    margin-top: 6px;
-    flex: 1;
-    justify-content: center;
+    margin-top: 4px;
 }
 
 .btn-option {
@@ -430,7 +437,7 @@ body {
     align-items: center;
     justify-content: center;
     flex: 1;
-    padding: 20px 0;
+    padding: 10px 0;
     text-align: center;
 }
 
@@ -474,73 +481,94 @@ body {
 }
 
 /* ============================================================
-   АДАПТИВНОСТЬ
+   АДАПТИВНОСТЬ ДЛЯ ПЛАНШЕТОВ И ДЕСКТОПОВ
    ============================================================ */
-@media (max-width: 500px) {
+@media (min-width: 600px) {
     .game-container {
-        padding: 16px 14px 20px;
-        border-radius: 20px;
-        min-height: 380px;
-        max-width: 100%;
-        margin: 8px;
-        width: calc(100% - 16px);
+        border-radius: 32px;
+        padding: 28px 24px 32px;
+        max-width: 440px;
+        height: auto;
+        min-height: 500px;
+        max-height: 90vh;
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
     }
-    
+
     .pulse-ring {
-        inset: 5px;
-        border-radius: 16px;
+        inset: 8px;
+        border-radius: 24px;
     }
-    
+}
+
+/* ============================================================
+   АДАПТИВНОСТЬ ДЛЯ ТЕЛЕФОНОВ (уже применена)
+   ============================================================ */
+@media (max-width: 599px) {
+    .game-container {
+        padding: 16px 14px 18px;
+        border-radius: 0;
+        min-height: 100vh;
+        min-height: 100dvh;
+        height: 100vh;
+        height: 100dvh;
+        max-width: 100%;
+        box-shadow: none;
+    }
+
+    .pulse-ring {
+        inset: 4px;
+        border-radius: 12px;
+    }
+
     .btn-option {
-        font-size: 16px;
-        padding: 14px 16px;
+        font-size: 17px;
+        padding: 16px 18px;
         border-radius: 14px;
     }
-    
+
     .start-screen h1 {
-        font-size: 28px;
+        font-size: 30px;
     }
-    
+
     .start-screen .subtitle {
         font-size: 26px;
     }
-    
+
     .start-quote {
-        font-size: 14px;
-        margin: 2px 0 24px;
+        font-size: 15px;
+        margin: 2px 0 20px;
+        padding: 0 10px;
     }
-    
+
     .btn-start {
         font-size: 18px;
         padding: 14px 36px;
     }
-    
+
     .result-screen .final-score {
-        font-size: 38px;
+        font-size: 42px;
     }
-    
+
     .result-screen h2 {
-        font-size: 24px;
+        font-size: 26px;
     }
-    
+
     .btn-restart {
         font-size: 16px;
         padding: 12px 32px;
     }
-    
+
     .work-title {
         font-size: 14px;
         margin-top: 12px;
         min-height: 22px;
+        padding: 0 8px;
     }
-    
+
     .btn-next {
         font-size: 15px;
         padding: 12px;
-    }
-    
-    .game-content {
-        min-height: 320px;
+        margin-top: 12px;
     }
 
     .btn-pause,
@@ -552,37 +580,51 @@ body {
     .score-label {
         font-size: 12px;
         padding: 3px 12px;
+    }
+
+    .game-header {
+        margin-bottom: 12px;
     }
 }
 
 @media (max-width: 380px) {
     .game-container {
-        padding: 12px 10px 16px;
-        border-radius: 16px;
-        min-height: 340px;
+        padding: 12px 10px 14px;
     }
-    
+
+    .pulse-ring {
+        inset: 3px;
+        border-radius: 10px;
+    }
+
     .btn-option {
-        font-size: 14px;
-        padding: 12px 14px;
+        font-size: 15px;
+        padding: 14px 14px;
         border-radius: 12px;
     }
-    
+
     .start-screen h1 {
-        font-size: 24px;
+        font-size: 26px;
     }
-    
+
     .start-screen .subtitle {
         font-size: 22px;
     }
-    
+
+    .start-quote {
+        font-size: 13px;
+        margin: 2px 0 16px;
+    }
+
     .btn-start {
         font-size: 16px;
         padding: 12px 28px;
     }
-    
+
     .work-title {
         font-size: 13px;
+        margin-top: 10px;
+        min-height: 20px;
     }
 
     .btn-pause,
@@ -594,5 +636,9 @@ body {
     .score-label {
         font-size: 11px;
         padding: 2px 10px;
+    }
+
+    .options {
+        gap: 10px;
     }
 }
