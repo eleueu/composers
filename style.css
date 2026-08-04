@@ -3,7 +3,7 @@
    ============================================================ */
 @font-face {
     font-family: 'CMU Serif';
-    src: url('fonts/cmu_serif_roman.woff') format('woff');
+    src: url('fonts/cmu-serif.woff') format('woff');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -11,7 +11,7 @@
 
 @font-face {
     font-family: 'CMU Serif';
-    src: url('fonts/cmu_serif_bold.woff') format('woff');
+    src: url('fonts/cmu-serif-bold.woff') format('woff');
     font-weight: bold;
     font-style: normal;
     font-display: swap;
@@ -47,6 +47,8 @@ body {
     box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 /* ============================================================
@@ -118,7 +120,7 @@ body {
     z-index: 1;
     display: flex;
     flex-direction: column;
-    min-height: 420px;
+    flex: 1;
 }
 
 /* ============================================================
@@ -128,6 +130,7 @@ body {
     display: flex;
     justify-content: flex-end;
     margin-bottom: 16px;
+    flex-shrink: 0;
 }
 
 .score-label {
@@ -211,23 +214,7 @@ body {
     display: none;
     flex-direction: column;
     flex: 1;
-    justify-content: center;
-}
-
-.track-info {
-    text-align: center;
-    margin-bottom: 12px;
-    font-size: 15px;
-    color: #7a7a7a;
-    letter-spacing: 0.3px;
-    min-height: 24px;
-    font-style: italic;
-}
-
-.track-info .composer-name {
-    color: #2d6bb8;
-    font-style: normal;
-    font-weight: bold;
+    justify-content: center;  /* ← ГЛАВНОЕ ИЗМЕНЕНИЕ: центрируем содержимое */
 }
 
 /* Кнопки вариантов */
@@ -313,24 +300,22 @@ body {
 }
 
 /* ============================================================
-   ФИДБЕК И КНОПКА ДАЛЕЕ
+   НАЗВАНИЕ ПРОИЗВЕДЕНИЯ (под кнопками)
    ============================================================ */
-.feedback {
+.work-title {
     text-align: center;
     margin-top: 16px;
-    font-size: 17px;
-    min-height: 30px;
+    font-size: 18px;
     font-weight: 500;
+    color: #1a1a2e;
+    min-height: 30px;
+    font-style: italic;
+    letter-spacing: 0.3px;
 }
 
-.feedback.correct {
-    color: #2ed573;
-}
-
-.feedback.wrong {
-    color: #ff4757;
-}
-
+/* ============================================================
+   КНОПКА ДАЛЕЕ
+   ============================================================ */
 .btn-next {
     background: #f0ede6;
     border: 2px solid #e0ddd8;
@@ -446,18 +431,4 @@ body {
     .result-screen .final-score {
         font-size: 42px;
     }
-}
-
-/* ============================================================
-   НАЗВАНИЕ ПРОИЗВЕДЕНИЯ (под кнопками)
-   ============================================================ */
-.work-title {
-    text-align: center;
-    margin-top: 16px;
-    font-size: 18px;
-    font-weight: 500;
-    color: #1a1a2e;
-    min-height: 30px;
-    font-style: italic;
-    letter-spacing: 0.3px;
 }
