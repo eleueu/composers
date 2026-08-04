@@ -91,6 +91,7 @@ let state = {
 //  ИНИЦИАЛИЗАЦИЯ АУДИО НА МОБИЛЬНЫХ
 // ============================================================
 let audioContextInitialized = false;
+let preloadedAudios = {};
 
 function initAudioOnInteraction() {
     if (audioContextInitialized) return;
@@ -101,10 +102,46 @@ function initAudioOnInteraction() {
         if (ctx.state === 'suspended') {
             ctx.resume();
         }
-        console.log('🎵 Аудиоконтекст инициализирован');
+        console.log('Аудиоконтекст инициализирован');
     } catch (e) {
         console.warn('Ошибка инициализации аудио:', e);
     }
+}
+
+// ============================================================
+//  ПРЕДЗАГРУЗКА АУДИОФАЙЛОВ
+// ============================================================
+function preloadAudios() {
+    console.log('Начинаем предзагрузку аудиофайлов...');
+    
+    WORKS.forEach((work) => {
+        const filePath = 'audio/' + work.file;
+        
+        if (preloadedAudios[filePath]) {
+            return;
+        }
+        
+        try {
+            const audio = new Audio();
+            audio.src = filePath;
+            audio.preload = 'auto';
+            audio.load();
+            
+            preloadedAudios[filePath] = audio;
+            
+            audio.addEventListener('canplaythrough', function onReady() {
+                audio.removeEventListener('canplaythrough', onReady);
+                console.log('Предзагружен:', work.file);
+            });
+            
+            audio.addEventListener('error', function(e) {
+                console.warn('Ошибка предзагрузки:', work.file);
+            });
+            
+        } catch (e) {
+            console.warn('Ошибка при предзагрузке:', work.file);
+        }
+    });
 }
 
 // Вешаем на любое касание страницы
@@ -531,8 +568,8 @@ function resetGame() {
 }
 
 function startGame() {
-    // Инициализируем аудио при нажатии на "Начать игру"
     initAudioOnInteraction();
+    preloadAudios();
     
     state.questions = generateQuestions();
     state.score = 0;

@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Угадай композитора</title>
+    
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -49,6 +53,18 @@
             </div>
         </div>
     </div>
+
+    <!-- Инициализация Telegram WebApp -->
+    <script>
+        // Убедимся, что Telegram WebApp загружен и расширяем приложение
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+            console.log('Telegram WebApp инициализирован и расширен');
+        } else {
+            console.log('Telegram WebApp не найден (обычный браузер)');
+        }
+    </script>
 
     <script src="script.js"></script>
 </body>

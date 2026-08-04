@@ -73,6 +73,12 @@ body {
     border-radius: 0;
     padding: 16px 16px 20px;
     box-shadow: none;
+    
+    /* Безопасные отступы для Telegram WebApp */
+    padding-top: calc(16px + var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px));
+    padding-right: calc(16px + var(--tg-safe-area-inset-right, 0px));
+    padding-bottom: calc(20px + var(--tg-safe-area-inset-bottom, 0px));
+    padding-left: calc(16px + var(--tg-safe-area-inset-left, 0px));
 }
 
 /* ============================================================
@@ -277,7 +283,7 @@ body {
 }
 
 /* ============================================================
-   ИГРОВОЙ ЭКРАН — РАСТЯГИВАЕМ НА ВСЮ ВЫСОТУ
+   ИГРОВОЙ ЭКРАН
    ============================================================ */
 .game-screen {
     display: none;
@@ -287,7 +293,6 @@ body {
     padding: 0;
 }
 
-/* Кнопки вариантов — занимают всё доступное пространство */
 .options {
     display: flex;
     flex-direction: column;
@@ -359,7 +364,6 @@ body {
     opacity: 0.7;
 }
 
-/* Название произведения и кнопка "Далее" — прижаты к низу */
 .work-title {
     text-align: center;
     margin-top: 16px;
@@ -454,6 +458,10 @@ body {
         border-radius: 32px;
         padding: 28px 24px 32px;
         box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+        padding-top: 28px;
+        padding-right: 24px;
+        padding-bottom: 32px;
+        padding-left: 24px;
     }
 
     .pulse-ring {
