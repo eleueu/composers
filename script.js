@@ -178,7 +178,7 @@ function stopAudio() {
 }
 
 // ============================================================
-//  ПУЛЬСАЦИЯ
+//  ПУЛЬСАЦИЯ (улучшенная)
 // ============================================================
 function startPulseAnimation() {
     if (state.animationId) {
@@ -189,40 +189,62 @@ function startPulseAnimation() {
     
     function animatePulse() {
         const elapsed = (Date.now() - startTime) / 1000;
-        const intensity = 0.2 + 0.6 * (0.5 + 0.5 * Math.sin(elapsed * 3));
         
-        pulseRing.classList.add('active');
+        // Комбинация трёх синусоид для более естественной пульсации
+        const pulse1 = 0.5 + 0.5 * Math.sin(elapsed * 3.2);
+        const pulse2 = 0.5 + 0.5 * Math.sin(elapsed * 1.7 + 1.2);
+        const pulse3 = 0.5 + 0.5 * Math.sin(elapsed * 4.5 + 0.8);
         
-        if (intensity > 0.7) {
-            pulseRing.className = 'pulse-ring intense';
-        } else if (intensity > 0.4) {
-            pulseRing.className = 'pulse-ring strong';
-        } else {
-            pulseRing.className = 'pulse-ring active';
-        }
-
-        const glow = 30 + intensity * 100;
-        const borderOpacity = 0.2 + intensity * 0.7;
-        const insetGlow = intensity * 120;
+        // Смешиваем пульсации
+        const rawIntensity = (pulse1 * 0.6 + pulse2 * 0.3 + pulse3 * 0.1);
+        const intensity = 0.1 + rawIntensity * 0.8;
         
-        pulseRing.style.borderColor = 'rgba(41, 128, 255, ' + borderOpacity + ')';
-        pulseRing.style.boxShadow = 
-            'inset 0 0 ' + insetGlow + 'px rgba(41, 128, 255, ' + (0.05 + intensity * 0.2) + '), ' +
-            'inset 0 0 ' + (insetGlow * 1.5) + 'px rgba(41, 128, 255, ' + (0.02 + intensity * 0.1) + '), ' +
-            '0 0 ' + glow + 'px rgba(41, 128, 255, ' + (0.05 + intensity * 0.15) + ')';
-        
-        const alpha = 0.02 + intensity * 0.1;
-        pulseRing.style.background = 'radial-gradient(' +
-            'ellipse at center, ' +
-            'rgba(41, 128, 255, ' + alpha + ') 0%, ' +
-            'rgba(41, 128, 255, ' + (alpha * 0.5) + ') 40%, ' +
-            'transparent 70%' +
-        ')';
+        updatePulseRingIntensity(intensity);
         
         state.animationId = requestAnimationFrame(animatePulse);
     }
     
     animatePulse();
+}
+
+function updatePulseRingIntensity(intensity) {
+    pulseRing.classList.add('active');
+    
+    // Smoothstep-интерполяция для более плавных переходов
+    const smoothIntensity = intensity * intensity * (3 - 2 * intensity);
+    
+    // Расширенный диапазон интенсивности
+    const minIntensity = 0.05;
+    const maxIntensity = 1.0;
+    const finalIntensity = minIntensity + (maxIntensity - minIntensity) * smoothIntensity;
+    
+    // Определяем класс в зависимости от интенсивности
+    if (finalIntensity > 0.8) {
+        pulseRing.className = 'pulse-ring intense';
+    } else if (finalIntensity > 0.5) {
+        pulseRing.className = 'pulse-ring strong';
+    } else {
+        pulseRing.className = 'pulse-ring active';
+    }
+
+    // Более широкий диапазон свечения и толщины
+    const glow = 20 + finalIntensity * 160;
+    const borderOpacity = 0.1 + finalIntensity * 0.85;
+    const insetGlow = finalIntensity * 200;
+    
+    pulseRing.style.borderColor = 'rgba(41, 128, 255, ' + borderOpacity + ')';
+    pulseRing.style.boxShadow = 
+        'inset 0 0 ' + insetGlow + 'px rgba(41, 128, 255, ' + (0.03 + finalIntensity * 0.25) + '), ' +
+        'inset 0 0 ' + (insetGlow * 2) + 'px rgba(41, 128, 255, ' + (0.01 + finalIntensity * 0.12) + '), ' +
+        '0 0 ' + glow + 'px rgba(41, 128, 255, ' + (0.03 + finalIntensity * 0.2) + ')';
+    
+    const alpha = 0.01 + finalIntensity * 0.15;
+    pulseRing.style.background = 'radial-gradient(' +
+        'ellipse at center, ' +
+        'rgba(41, 128, 255, ' + alpha + ') 0%, ' +
+        'rgba(41, 128, 255, ' + (alpha * 0.4) + ') 40%, ' +
+        'transparent 70%' +
+    ')';
 }
 
 // ============================================================
@@ -280,7 +302,7 @@ function loadQuestion(index) {
     }
 
     state.isAnswered = false;
-    workTitle.textContent = '';          // Очищаем название произведения
+    workTitle.textContent = '';
     btnNext.style.display = 'none';
 
     scoreDisplay.textContent = state.score;
@@ -327,7 +349,6 @@ function handleOptionClick(e) {
         }
     });
 
-    // ПОСЛЕ ОТВЕТА: показываем название произведения ПОД КНОПКАМИ
     const currentWork = state.questions[state.currentIndex].work;
     workTitle.textContent = currentWork.title + ' — ' + currentWork.composer;
 
