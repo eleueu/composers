@@ -230,7 +230,7 @@ body {
     display: none;
     flex-direction: column;
     flex: 1;
-    justify-content: center;  /* ← ГЛАВНОЕ ИЗМЕНЕНИЕ: центрируем содержимое */
+    justify-content: center;  
 }
 
 /* Кнопки вариантов */
@@ -326,6 +326,7 @@ body {
     color: #1a1a2e;
     min-height: 30px;
     font-style: italic;
+    font-weight: bold;
     letter-spacing: 0.3px;
 }
 
