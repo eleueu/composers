@@ -16,7 +16,6 @@ const COMPOSERS = [
 
 // 2. Произведения (связь: файл → композитор + название)
 const WORKS = [
-    // Чайковский
     {
         composer: 'Пётр Ильич Чайковский',
         title: 'Октябрь (Осенняя песнь)',
@@ -27,25 +26,21 @@ const WORKS = [
         title: 'Размышление',
         file: 'chaikovsky_razmyshlenie.mp3'
     },
-    // Дога
     {
         composer: 'Евгений Дмитриевич Дога',
         title: 'Граммофон (из к/ф "Мой ласковый и нежный зверь")',
         file: 'doga_grammofon.mp3'
     },
-    // Эйнауди
     {
         composer: 'Людовико Эйнауди',
         title: 'Experience',
         file: 'einaudi_experience.mp3'
     },
-    // Лист
     {
         composer: 'Ференц Лист',
         title: 'Грёзы любви (Liebesträume)',
         file: 'list_grezylubvi.mp3'
     },
-    // Рахманинов
     {
         composer: 'Сергей Васильевич Рахманинов',
         title: 'Концерт для фортепиано №2 (фрагмент)',
@@ -56,7 +51,6 @@ const WORKS = [
         title: 'Прелюдия до-диез минор',
         file: 'rahmaninoff_preludedodiezminor.mp3'
     },
-    // Шнитке
     {
         composer: 'Альфред Гарриевич Шнитке',
         title: 'Из "Мёртвых душ" (полька)',
@@ -67,13 +61,11 @@ const WORKS = [
         title: 'Из музыки к к/ф "Сказка странствий"',
         file: 'shnitke_lesskazok.mp3'
     },
-    // Шостакович
     {
         composer: 'Дмитрий Дмитриевич Шостакович',
         title: 'Прелюдия ре-мажор',
         file: 'shostakovich_prelude5remajor.mp3'
     },
-    // Свиридов
     {
         composer: 'Георгий Васильевич Свиридов',
         title: 'Вальс из к/ф "Метель"',
@@ -131,37 +123,25 @@ function getRandomElement(array) {
 //  ГЕНЕРАЦИЯ ВОПРОСОВ
 // ============================================================
 function generateQuestions() {
-    // Перемешиваем произведения
     const shuffledWorks = shuffle([...WORKS]);
-    
-    // Берём первые TOTAL_QUESTIONS
     const selectedWorks = shuffledWorks.slice(0, TOTAL_QUESTIONS);
     
     const questions = selectedWorks.map((work) => {
-        // Правильный композитор
         const correctComposer = work.composer;
         
-        // Выбираем неправильный вариант (из списка композиторов, не совпадающий с правильным)
         let wrongComposer = correctComposer;
         const otherComposers = COMPOSERS.filter(c => c !== correctComposer);
         
         if (otherComposers.length > 0) {
             wrongComposer = getRandomElement(otherComposers);
-        } else {
-            // Если вдруг только один композитор в базе
-            wrongComposer = correctComposer;
         }
         
-        // Создаём варианты ответа
         let options = [
             { name: correctComposer, isCorrect: true },
             { name: wrongComposer, isCorrect: false }
         ];
         
-        // Перемешиваем варианты
         options = shuffle(options);
-        
-        // Находим индекс правильного ответа
         const correctIndex = options.findIndex(opt => opt.isCorrect === true);
         
         return {
@@ -190,9 +170,7 @@ function stopAudio() {
             state.audioElement.currentTime = 0;
             state.audioElement.src = '';
             state.audioElement.load();
-        } catch (e) {
-            // Игнорируем
-        }
+        } catch (e) {}
         state.audioElement = null;
     }
     
@@ -255,8 +233,7 @@ function startPulseAnimation() {
 // ============================================================
 function playMelody(work, onComplete) {
     const filePath = 'audio/' + work.file;
-    console.log('▶ Воспроизведение:', work.title, '—', work.composer);
-    console.log('   Файл:', filePath);
+    console.log('Воспроизведение:', work.title, '—', work.composer);
     
     stopAudio();
     
@@ -271,17 +248,16 @@ function playMelody(work, onComplete) {
             audio.addEventListener('canplaythrough', function onCanPlay() {
                 audio.removeEventListener('canplaythrough', onCanPlay);
                 audio.play().then(() => {
-                    console.log('✅ Воспроизведение начато');
                     state.audioElement = audio;
                     if (onComplete) onComplete();
                 }).catch(err => {
-                    console.warn('⚠️ Ошибка воспроизведения:', err);
+                    console.warn('Ошибка воспроизведения:', err);
                     if (onComplete) onComplete();
                 });
             });
             
             audio.addEventListener('error', function(e) {
-                console.warn('⚠️ Ошибка загрузки аудио:', filePath);
+                console.warn('Ошибка загрузки аудио:', filePath);
                 if (onComplete) onComplete();
             });
             
@@ -289,7 +265,7 @@ function playMelody(work, onComplete) {
             state.audioElement = audio;
             
         } catch (e) {
-            console.error('❌ Критическая ошибка:', e);
+            console.error('Критическая ошибка:', e);
             startPulseAnimation();
             if (onComplete) onComplete();
         }
@@ -306,10 +282,6 @@ function loadQuestion(index) {
         return;
     }
 
-    console.log('📝 Загрузка вопроса', index + 1, 'из', state.questions.length);
-    console.log('   Произведение:', q.work.title);
-    console.log('   Правильный композитор:', q.correctComposer);
-
     state.isAnswered = false;
     feedback.textContent = '';
     feedback.className = 'feedback';
@@ -317,10 +289,9 @@ function loadQuestion(index) {
 
     scoreDisplay.textContent = state.score;
 
-    // Показываем название произведения
-    trackInfo.innerHTML = '🎵 <span class="composer-name">' + q.work.title + '</span>';
+    // Ничего не показываем в треке во время вопроса
+    trackInfo.textContent = '';
 
-    // Настраиваем кнопки
     const btns = optionsContainer.querySelectorAll('.btn-option');
     btns.forEach((btn, i) => {
         if (i < q.options.length) {
@@ -331,7 +302,6 @@ function loadQuestion(index) {
         }
     });
 
-    // Запускаем музыку
     setTimeout(() => {
         playMelody(q.work);
     }, 300);
@@ -363,6 +333,10 @@ function handleOptionClick(e) {
             b.classList.add('wrong');
         }
     });
+
+    // ПОСЛЕ ОТВЕТА показываем название произведения и композитора
+    const currentWork = state.questions[state.currentIndex].work;
+    trackInfo.textContent = currentWork.title + ' — ' + currentWork.composer;
 
     if (isCorrect) {
         state.score += 1;
@@ -472,6 +446,6 @@ document.querySelectorAll('.btn-option').forEach(btn => {
 //  ИНИЦИАЛИЗАЦИЯ
 // ============================================================
 resetGame();
-console.log('🎵 Игра "Угадай композитора" загружена!');
-console.log('📚 Композиторов:', COMPOSERS.length);
-console.log('🎶 Произведений:', WORKS.length);
+console.log('Игра "Угадай композитора" загружена!');
+console.log('Композиторов:', COMPOSERS.length);
+console.log('Произведений:', WORKS.length);
