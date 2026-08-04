@@ -87,7 +87,33 @@ let state = {
     currentWork: null,
 };
 
-// DOM-элементы
+// ============================================================
+//  ИНИЦИАЛИЗАЦИЯ АУДИО НА МОБИЛЬНЫХ
+// ============================================================
+let audioContextInitialized = false;
+
+function initAudioOnInteraction() {
+    if (audioContextInitialized) return;
+    audioContextInitialized = true;
+    
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === 'suspended') {
+            ctx.resume();
+        }
+        console.log('🎵 Аудиоконтекст инициализирован');
+    } catch (e) {
+        console.warn('Ошибка инициализации аудио:', e);
+    }
+}
+
+// Вешаем на любое касание страницы
+document.addEventListener('touchstart', initAudioOnInteraction, { once: true });
+document.addEventListener('click', initAudioOnInteraction, { once: true });
+
+// ============================================================
+//  DOM-ЭЛЕМЕНТЫ
+// ============================================================
 const $ = id => document.getElementById(id);
 const startScreen = $('startScreen');
 const gameScreen = $('gameScreen');
@@ -505,6 +531,9 @@ function resetGame() {
 }
 
 function startGame() {
+    // Инициализируем аудио при нажатии на "Начать игру"
+    initAudioOnInteraction();
+    
     state.questions = generateQuestions();
     state.score = 0;
     state.currentIndex = 0;
