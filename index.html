@@ -18,25 +18,28 @@
             <div class="start-screen" id="startScreen">
                 <h1>Угадай</h1>
                 <h1 class="subtitle">композитора</h1>
-                <p>Слушайте отрывок и выбирайте<br>автора произведения</p>
+                <p class="start-quote">Огромный и чудесный мир музыки ждёт Вас!</p>
                 <button class="btn-start" id="btnStart">Начать игру</button>
             </div>
 
             <div class="game-screen" id="gameScreen">
+                <div class="game-controls">
+                    <button class="btn-pause" id="btnPause">Пауза</button>
+                    <button class="btn-exit" id="btnExit">Выйти</button>
+                </div>
 
                 <div class="options" id="optionsContainer">
                     <button class="btn-option" data-index="0">Композитор А</button>
                     <button class="btn-option" data-index="1">Композитор Б</button>
                 </div>
+
                 <div class="work-title" id="workTitle"></div>
-                <div class="feedback" id="feedback"></div>
                 <button class="btn-next" id="btnNext">Следующий вопрос</button>
             </div>
 
             <div class="result-screen" id="resultScreen">
                 <div class="final-score" id="finalScore">0/5</div>
                 <h2 id="resultTitle">Отлично!</h2>
-                <div class="detail" id="resultDetail">Огромный и чудесный мир музыки ждёт Вас!</div>
                 <button class="btn-restart" id="btnRestart">Играть снова</button>
             </div>
         </div>

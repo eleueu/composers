@@ -83,6 +83,8 @@ let state = {
     isAnswered: false,
     audioElement: null,
     animationId: null,
+    isPaused: false,
+    currentWork: null,
 };
 
 // DOM-элементы
@@ -95,6 +97,8 @@ const optionsContainer = $('optionsContainer');
 const btnNext = $('btnNext');
 const btnStart = $('btnStart');
 const btnRestart = $('btnRestart');
+const btnPause = $('btnPause');
+const btnExit = $('btnExit');
 const pulseRing = $('pulseRing');
 const finalScore = $('finalScore');
 const resultTitle = $('resultTitle');
@@ -178,7 +182,78 @@ function stopAudio() {
 }
 
 // ============================================================
-//  ПУЛЬСАЦИЯ (улучшенная)
+//  УПРАВЛЕНИЕ ИГРОЙ
+// ============================================================
+function togglePause() {
+    state.isPaused = !state.isPaused;
+    
+    if (state.isPaused) {
+        btnPause.textContent = 'Продолжить';
+        btnPause.classList.add('active');
+        
+        if (state.audioElement) {
+            state.audioElement.pause();
+        }
+        
+        if (state.animationId) {
+            cancelAnimationFrame(state.animationId);
+            state.animationId = null;
+        }
+        
+        pulseRing.className = 'pulse-ring';
+        pulseRing.style.borderColor = 'rgba(41, 128, 255, 0.15)';
+        pulseRing.style.boxShadow = 'inset 0 0 20px rgba(41, 128, 255, 0.02), 0 0 20px rgba(41, 128, 255, 0.02)';
+        pulseRing.style.background = 'transparent';
+        
+        document.querySelectorAll('.btn-option').forEach(btn => {
+            btn.disabled = true;
+        });
+        
+    } else {
+        btnPause.textContent = 'Пауза';
+        btnPause.classList.remove('active');
+        
+        if (state.audioElement) {
+            state.audioElement.play().catch(err => console.warn('Ошибка возобновления:', err));
+        }
+        
+        startPulseAnimation();
+        
+        if (!state.isAnswered) {
+            document.querySelectorAll('.btn-option').forEach(btn => {
+                btn.disabled = false;
+            });
+        }
+    }
+}
+
+function exitGame() {
+    stopAudio();
+    state.isPaused = false;
+    state.isAnswered = false;
+    
+    btnPause.textContent = 'Пауза';
+    btnPause.classList.remove('active');
+    
+    gameScreen.style.display = 'none';
+    resultScreen.style.display = 'none';
+    startScreen.style.display = 'flex';
+    
+    state.score = 0;
+    state.currentIndex = 0;
+    state.questions = generateQuestions();
+    scoreDisplay.textContent = '0';
+    workTitle.textContent = '';
+    btnNext.style.display = 'none';
+    
+    document.querySelectorAll('.btn-option').forEach(btn => {
+        btn.disabled = false;
+        btn.className = 'btn-option';
+    });
+}
+
+// ============================================================
+//  ПУЛЬСАЦИЯ
 // ============================================================
 function startPulseAnimation() {
     if (state.animationId) {
@@ -190,12 +265,10 @@ function startPulseAnimation() {
     function animatePulse() {
         const elapsed = (Date.now() - startTime) / 1000;
         
-        // Комбинация трёх синусоид для более естественной пульсации
         const pulse1 = 0.5 + 0.5 * Math.sin(elapsed * 3.2);
         const pulse2 = 0.5 + 0.5 * Math.sin(elapsed * 1.7 + 1.2);
         const pulse3 = 0.5 + 0.5 * Math.sin(elapsed * 4.5 + 0.8);
         
-        // Смешиваем пульсации
         const rawIntensity = (pulse1 * 0.6 + pulse2 * 0.3 + pulse3 * 0.1);
         const intensity = 0.1 + rawIntensity * 0.8;
         
@@ -210,15 +283,12 @@ function startPulseAnimation() {
 function updatePulseRingIntensity(intensity) {
     pulseRing.classList.add('active');
     
-    // Smoothstep-интерполяция для более плавных переходов
     const smoothIntensity = intensity * intensity * (3 - 2 * intensity);
     
-    // Расширенный диапазон интенсивности
     const minIntensity = 0.05;
     const maxIntensity = 1.0;
     const finalIntensity = minIntensity + (maxIntensity - minIntensity) * smoothIntensity;
     
-    // Определяем класс в зависимости от интенсивности
     if (finalIntensity > 0.8) {
         pulseRing.className = 'pulse-ring intense';
     } else if (finalIntensity > 0.5) {
@@ -227,7 +297,6 @@ function updatePulseRingIntensity(intensity) {
         pulseRing.className = 'pulse-ring active';
     }
 
-    // Более широкий диапазон свечения и толщины
     const glow = 20 + finalIntensity * 160;
     const borderOpacity = 0.1 + finalIntensity * 0.85;
     const insetGlow = finalIntensity * 200;
@@ -253,6 +322,8 @@ function updatePulseRingIntensity(intensity) {
 function playMelody(work, onComplete) {
     const filePath = 'audio/' + work.file;
     console.log('Воспроизведение:', work.title, '—', work.composer);
+    
+    state.currentWork = work;
     
     stopAudio();
     
@@ -302,6 +373,9 @@ function loadQuestion(index) {
     }
 
     state.isAnswered = false;
+    state.isPaused = false;
+    btnPause.textContent = 'Пауза';
+    btnPause.classList.remove('active');
     workTitle.textContent = '';
     btnNext.style.display = 'none';
 
@@ -415,7 +489,11 @@ function resetGame() {
     state.score = 0;
     state.currentIndex = 0;
     state.isAnswered = false;
+    state.isPaused = false;
     state.questions = generateQuestions();
+
+    btnPause.textContent = 'Пауза';
+    btnPause.classList.remove('active');
 
     scoreDisplay.textContent = '0';
     workTitle.textContent = '';
@@ -430,6 +508,9 @@ function startGame() {
     state.questions = generateQuestions();
     state.score = 0;
     state.currentIndex = 0;
+    state.isPaused = false;
+    btnPause.textContent = 'Пауза';
+    btnPause.classList.remove('active');
 
     startScreen.style.display = 'none';
     resultScreen.style.display = 'none';
@@ -444,6 +525,8 @@ function startGame() {
 btnStart.addEventListener('click', startGame);
 btnRestart.addEventListener('click', resetGame);
 btnNext.addEventListener('click', goToNext);
+btnPause.addEventListener('click', togglePause);
+btnExit.addEventListener('click', exitGame);
 
 document.querySelectorAll('.btn-option').forEach(btn => {
     btn.addEventListener('click', handleOptionClick);
