@@ -24,7 +24,7 @@ const WORKS = [
     {
         composer: 'Пётр Ильич Чайковский',
         title: 'Размышление',
-        file: 'chaikovsky_razmyshlenie.mp3'
+        file: 'chaikovsky_razmyshlenie.MP3'
     },
     {
         composer: 'Евгений Дмитриевич Дога',
@@ -39,7 +39,7 @@ const WORKS = [
     {
         composer: 'Ференц Лист',
         title: 'Грёзы любви',
-        file: 'list_grezylubvi.mp3'
+        file: 'list_grezylubvi.MP3'
     },
     {
         composer: 'Сергей Васильевич Рахманинов',
@@ -49,7 +49,7 @@ const WORKS = [
     {
         composer: 'Сергей Васильевич Рахманинов',
         title: 'Прелюдия до-диез минор',
-        file: 'rahmaninoff_preludedodiezminor.mp3'
+        file: 'rahmaninoff_preludedodiezminor.MP3'
     },
     {
         composer: 'Альфред Гарриевич Шнитке',
