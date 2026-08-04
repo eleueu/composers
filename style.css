@@ -215,13 +215,13 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
     flex-shrink: 0;
 }
 
 .game-controls {
     display: flex;
-    gap: 8px;
+    gap: 12px;
     flex-shrink: 0;
 }
 
@@ -231,13 +231,13 @@ body {
     border: none;
     color: #7a7a7a;
     font-family: 'CMU Serif', serif;
-    padding: 6px 18px;
+    padding: 8px 22px;
     border-radius: 40px;
-    font-size: 15px;
-    font-weight: 500;
+    font-size: 16px;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.25s ease;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.5px;
     flex-shrink: 0;
 }
 
@@ -266,13 +266,13 @@ body {
 }
 
 .score-label {
-    font-size: 15px;
+    font-size: 16px;
     color: #7a7a7a;
     background: rgba(41, 128, 255, 0.06);
-    padding: 6px 18px;
+    padding: 8px 22px;
     border-radius: 40px;
-    font-weight: 500;
-    letter-spacing: 0.3px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
     flex-shrink: 0;
 }
 
@@ -317,7 +317,7 @@ body {
     letter-spacing: 0.2px;
     position: relative;
     overflow: hidden;
-    max-width: 80%;
+    max-width: 70%;
     width: 100%;
 }
 
@@ -368,13 +368,13 @@ body {
 
 .work-title {
     text-align: center;
-    margin-top: 20px;
-    font-size: 18px;
-    font-weight: 500;
+    margin-top: 24px;
+    font-size: 20px;
+    font-weight: 600;
     color: #1a1a2e;
-    min-height: 28px;
+    min-height: 30px;
     font-style: italic;
-    letter-spacing: 0.2px;
+    letter-spacing: 0.3px;
     flex-shrink: 0;
     padding: 0 8px;
 }
@@ -389,10 +389,10 @@ body {
     font-size: 17px;
     font-weight: 600;
     cursor: pointer;
-    margin-top: 24px;
+    margin-top: 28px;
     transition: all 0.2s ease;
     display: none;
-    max-width: 80%;
+    max-width: 70%;
     width: 100%;
     margin-left: auto;
     margin-right: auto;
@@ -549,7 +549,7 @@ body {
         font-size: 18px;
         padding: 17px 18px;
         border-radius: 14px;
-        max-width: 85%;
+        max-width: 80%;
     }
 
     .options {
@@ -561,32 +561,32 @@ body {
     }
 
     .work-title {
-        font-size: 16px;
-        margin-top: 18px;
-        min-height: 24px;
+        font-size: 18px;
+        margin-top: 20px;
+        min-height: 26px;
         padding: 0 4px;
     }
 
     .btn-next {
         font-size: 16px;
         padding: 13px 18px;
-        margin-top: 20px;
-        max-width: 85%;
+        margin-top: 24px;
+        max-width: 80%;
     }
 
     .btn-pause,
     .btn-exit {
         font-size: 14px;
-        padding: 5px 16px;
+        padding: 6px 16px;
     }
 
     .score-label {
         font-size: 14px;
-        padding: 5px 16px;
+        padding: 6px 16px;
     }
 
     .game-header {
-        margin-bottom: 12px;
+        margin-bottom: 16px;
     }
 
     .result-screen .final-score {
@@ -638,7 +638,7 @@ body {
         font-size: 15px;
         padding: 14px 14px;
         border-radius: 12px;
-        max-width: 90%;
+        max-width: 85%;
     }
 
     .options {
@@ -646,16 +646,16 @@ body {
     }
 
     .work-title {
-        font-size: 14px;
-        margin-top: 14px;
-        min-height: 20px;
+        font-size: 16px;
+        margin-top: 16px;
+        min-height: 22px;
     }
 
     .btn-next {
         font-size: 14px;
         padding: 11px 14px;
-        margin-top: 16px;
-        max-width: 90%;
+        margin-top: 20px;
+        max-width: 85%;
     }
 
     .btn-pause,
