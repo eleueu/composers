@@ -115,25 +115,28 @@ function generateQuestions() {
 }
 
 // ============================================================
-//  ОСТАНОВКА АУДИО
+//  ОСТАНОВКА АУДИО (полная очистка)
 // ============================================================
 function stopAudio() {
+    console.log('⏹ Остановка аудио');
+    
     // Останавливаем анимацию
     if (state.animationId) {
         cancelAnimationFrame(state.animationId);
         state.animationId = null;
     }
     
-    // Останавливаем аудио
+    // Полностью удаляем аудиоэлемент
     if (state.audioElement) {
         try {
             state.audioElement.pause();
             state.audioElement.currentTime = 0;
-            state.audioElement.src = '';
-            state.audioElement = null;
+            state.audioElement.src = '';  // Очищаем src
+            state.audioElement.load();     // Сбрасываем состояние
         } catch (e) {
             console.warn('Ошибка при остановке аудио:', e);
         }
+        state.audioElement = null;
     }
     
     // Сбрасываем рамку
@@ -144,7 +147,7 @@ function stopAudio() {
 }
 
 // ============================================================
-//  ПРОСТАЯ ПУЛЬСАЦИЯ БЕЗ AUDIOCONTEXT
+//  ПУЛЬСАЦИЯ
 // ============================================================
 function startPulseAnimation() {
     if (state.animationId) {
@@ -152,11 +155,9 @@ function startPulseAnimation() {
     }
     
     let startTime = Date.now();
-    let isPlaying = true;
     
     function animatePulse() {
         const elapsed = (Date.now() - startTime) / 1000;
-        // Плавная пульсация с частотой 2 Гц
         const intensity = 0.2 + 0.6 * (0.5 + 0.5 * Math.sin(elapsed * 3));
         
         updatePulseRingIntensity(intensity);
@@ -198,41 +199,57 @@ function updatePulseRingIntensity(intensity) {
 }
 
 // ============================================================
-//  ВОСПРОИЗВЕДЕНИЕ АУДИО (упрощённая версия)
+//  ВОСПРОИЗВЕДЕНИЕ АУДИО (исправленная версия)
 // ============================================================
 function playMelody(composer) {
     console.log('▶ Воспроизведение:', composer.name);
+    console.log('   Файл:', composer.audioSrc);
     
-    // Останавливаем предыдущее
+    // Полная остановка и очистка предыдущего аудио
     stopAudio();
     
-    try {
-        // Создаём новый аудиоэлемент
-        const audio = new Audio(composer.audioSrc);
-        
-        // Запускаем пульсацию сразу
-        startPulseAnimation();
-        
-        audio.addEventListener('canplaythrough', function onCanPlay() {
-            audio.removeEventListener('canplaythrough', onCanPlay);
-            audio.play().then(() => {
-                console.log('✅ Воспроизведение начато');
-                state.audioElement = audio;
-            }).catch(err => {
-                console.warn('⚠️ Ошибка воспроизведения:', err);
+    // Небольшая задержка перед созданием нового аудио
+    setTimeout(() => {
+        try {
+            // Создаём НОВЫЙ аудиоэлемент
+            const audio = new Audio();
+            audio.src = composer.audioSrc;
+            audio.preload = 'auto';
+            
+            console.log('   Создан новый аудиоэлемент');
+            
+            // Запускаем пульсацию сразу
+            startPulseAnimation();
+            
+            // Обработчик готовности
+            audio.addEventListener('canplaythrough', function onCanPlay() {
+                audio.removeEventListener('canplaythrough', onCanPlay);
+                console.log('   Аудио загружено, начинаем воспроизведение');
+                audio.play().then(() => {
+                    console.log('✅ Воспроизведение начато');
+                    state.audioElement = audio;
+                }).catch(err => {
+                    console.warn('⚠️ Ошибка воспроизведения:', err);
+                });
             });
-        });
-        
-        audio.addEventListener('error', function(e) {
-            console.warn('⚠️ Ошибка загрузки аудио:', composer.audioSrc);
-        });
-        
-        audio.load();
-        
-    } catch (e) {
-        console.warn('⚠️ Ошибка:', e);
-        startPulseAnimation();
-    }
+            
+            // Обработчик ошибки
+            audio.addEventListener('error', function(e) {
+                console.warn('⚠️ Ошибка загрузки аудио:', composer.audioSrc);
+                console.warn('   Код ошибки:', audio.error ? audio.error.code : 'unknown');
+            });
+            
+            // Начинаем загрузку
+            audio.load();
+            
+            // Сохраняем ссылку
+            state.audioElement = audio;
+            
+        } catch (e) {
+            console.error('❌ Критическая ошибка:', e);
+            startPulseAnimation();
+        }
+    }, 100);
 }
 
 // ============================================================
@@ -240,7 +257,13 @@ function playMelody(composer) {
 // ============================================================
 function loadQuestion(index) {
     const q = state.allQuestions[index];
-    if (!q) return;
+    if (!q) {
+        console.warn('Вопрос не найден, индекс:', index);
+        return;
+    }
+
+    console.log('📝 Загрузка вопроса', index + 1, 'из', state.allQuestions.length);
+    console.log('   Композитор:', q.composer.name);
 
     state.isAnswered = false;
     feedback.textContent = '';
@@ -255,13 +278,15 @@ function loadQuestion(index) {
         btn.className = 'btn-option';
         btn.disabled = false;
         btn.dataset.correct = q.options[i].isCorrect ? 'true' : 'false';
+        console.log('   Вариант', i + 1 + ':', q.options[i].name, 'правильный?', q.options[i].isCorrect);
     });
 
     trackInfo.textContent = 'Отрывок произведения';
 
+    // Запускаем музыку с задержкой
     setTimeout(() => {
         playMelody(q.composer);
-    }, 300);
+    }, 200);
 }
 
 function handleOptionClick(e) {
@@ -387,5 +412,5 @@ document.querySelectorAll('.btn-option').forEach(btn => {
 //  ИНИЦИАЛИЗАЦИЯ
 // ============================================================
 resetGame();
-console.log('Игра "Угадай композитора" загружена!');
-console.log('В базе ' + COMPOSERS_DB.length + ' композиторов');
+console.log('🎵 Игра "Угадай композитора" загружена!');
+console.log('📚 В базе ' + COMPOSERS_DB.length + ' композиторов');
