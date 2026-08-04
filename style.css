@@ -2,19 +2,35 @@
    ШРИФТЫ
    ============================================================ */
 @font-face {
-    font-family: 'CMU Serif';
-    src: url('fonts/cmu-serif.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
+  font-family: 'CMU Serif';
+  src: url('fonts/cmu_serif_roman.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-    font-family: 'CMU Serif';
-    src: url('fonts/cmu-serif-bold.woff') format('woff');
-    font-weight: bold;
-    font-style: normal;
-    font-display: swap;
+  font-family: 'CMU Serif';
+  src: url('fonts/cmu_serif_italic.woff') format('woff');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CMU Serif';
+  src: url('fonts/cmu_serif_bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CMU Serif';
+  src: url('fonts/cmu_serif_bold_italic.woff') format('woff');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
 }
 
 /* ============================================================
