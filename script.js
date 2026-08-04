@@ -80,7 +80,7 @@ const resultTitle = $('resultTitle');
 const resultDetail = $('resultDetail');
 
 // ============================================================
-//  ГЕНЕРАЦИЯ ВОПРОСОВ
+//  ГЕНЕРАЦИЯ ВОПРОСОВ (исправленная)
 // ============================================================
 function generateQuestions() {
     const shuffled = [...COMPOSERS_DB];
@@ -100,46 +100,55 @@ function generateQuestions() {
         }
         const wrong = shuffledOthers[0] || COMPOSERS_DB[0];
 
-        const correctPosition = Math.random() < 0.5 ? 0 : 1;
         const options = [
-            { name: composer.name, isCorrect: correctPosition === 0 },
-            { name: wrong.name, isCorrect: correctPosition === 1 }
+            { name: composer.name, isCorrect: true },
+            { name: wrong.name, isCorrect: false }
         ];
+        
+        for (let i = options.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [options[i], options[j]] = [options[j], options[i]];
+        }
+
+        const correctIndex = options.findIndex(opt => opt.isCorrect === true);
+
+        console.log('📝 Сгенерирован вопрос:');
+        console.log('   Правильный композитор:', composer.name);
+        console.log('   Вариант 1:', options[0].name, 'правильный?', options[0].isCorrect);
+        console.log('   Вариант 2:', options[1].name, 'правильный?', options[1].isCorrect);
+        console.log('   Индекс правильного ответа:', correctIndex);
 
         return {
             composer: composer,
             options: options,
-            correctIndex: correctPosition
+            correctIndex: correctIndex
         };
     });
 }
 
 // ============================================================
-//  ОСТАНОВКА АУДИО (полная очистка)
+//  ОСТАНОВКА АУДИО
 // ============================================================
 function stopAudio() {
     console.log('⏹ Остановка аудио');
     
-    // Останавливаем анимацию
     if (state.animationId) {
         cancelAnimationFrame(state.animationId);
         state.animationId = null;
     }
     
-    // Полностью удаляем аудиоэлемент
     if (state.audioElement) {
         try {
             state.audioElement.pause();
             state.audioElement.currentTime = 0;
-            state.audioElement.src = '';  // Очищаем src
-            state.audioElement.load();     // Сбрасываем состояние
+            state.audioElement.src = '';
+            state.audioElement.load();
         } catch (e) {
             console.warn('Ошибка при остановке аудио:', e);
         }
         state.audioElement = null;
     }
     
-    // Сбрасываем рамку
     pulseRing.className = 'pulse-ring';
     pulseRing.style.borderColor = 'rgba(41, 128, 255, 0.05)';
     pulseRing.style.boxShadow = 'inset 0 0 30px rgba(41, 128, 255, 0), 0 0 30px rgba(41, 128, 255, 0)';
@@ -159,9 +168,7 @@ function startPulseAnimation() {
     function animatePulse() {
         const elapsed = (Date.now() - startTime) / 1000;
         const intensity = 0.2 + 0.6 * (0.5 + 0.5 * Math.sin(elapsed * 3));
-        
         updatePulseRingIntensity(intensity);
-        
         state.animationId = requestAnimationFrame(animatePulse);
     }
     
@@ -199,29 +206,24 @@ function updatePulseRingIntensity(intensity) {
 }
 
 // ============================================================
-//  ВОСПРОИЗВЕДЕНИЕ АУДИО (исправленная версия)
+//  ВОСПРОИЗВЕДЕНИЕ АУДИО
 // ============================================================
 function playMelody(composer) {
     console.log('▶ Воспроизведение:', composer.name);
     console.log('   Файл:', composer.audioSrc);
     
-    // Полная остановка и очистка предыдущего аудио
     stopAudio();
     
-    // Небольшая задержка перед созданием нового аудио
     setTimeout(() => {
         try {
-            // Создаём НОВЫЙ аудиоэлемент
             const audio = new Audio();
             audio.src = composer.audioSrc;
             audio.preload = 'auto';
             
             console.log('   Создан новый аудиоэлемент');
             
-            // Запускаем пульсацию сразу
             startPulseAnimation();
             
-            // Обработчик готовности
             audio.addEventListener('canplaythrough', function onCanPlay() {
                 audio.removeEventListener('canplaythrough', onCanPlay);
                 console.log('   Аудио загружено, начинаем воспроизведение');
@@ -233,16 +235,11 @@ function playMelody(composer) {
                 });
             });
             
-            // Обработчик ошибки
             audio.addEventListener('error', function(e) {
                 console.warn('⚠️ Ошибка загрузки аудио:', composer.audioSrc);
-                console.warn('   Код ошибки:', audio.error ? audio.error.code : 'unknown');
             });
             
-            // Начинаем загрузку
             audio.load();
-            
-            // Сохраняем ссылку
             state.audioElement = audio;
             
         } catch (e) {
@@ -253,7 +250,7 @@ function playMelody(composer) {
 }
 
 // ============================================================
-//  ЛОГИКА ИГРЫ
+//  ЗАГРУЗКА ВОПРОСА
 // ============================================================
 function loadQuestion(index) {
     const q = state.allQuestions[index];
@@ -263,7 +260,8 @@ function loadQuestion(index) {
     }
 
     console.log('📝 Загрузка вопроса', index + 1, 'из', state.allQuestions.length);
-    console.log('   Композитор:', q.composer.name);
+    console.log('   Правильный ответ:', q.composer.name);
+    console.log('   correctIndex:', q.correctIndex);
 
     state.isAnswered = false;
     feedback.textContent = '';
@@ -274,21 +272,26 @@ function loadQuestion(index) {
 
     const btns = optionsContainer.querySelectorAll('.btn-option');
     btns.forEach((btn, i) => {
-        btn.textContent = q.options[i].name;
-        btn.className = 'btn-option';
-        btn.disabled = false;
-        btn.dataset.correct = q.options[i].isCorrect ? 'true' : 'false';
-        console.log('   Вариант', i + 1 + ':', q.options[i].name, 'правильный?', q.options[i].isCorrect);
+        if (i < q.options.length) {
+            btn.textContent = q.options[i].name;
+            const isCorrect = q.options[i].isCorrect === true;
+            btn.dataset.correct = isCorrect ? 'true' : 'false';
+            btn.className = 'btn-option';
+            btn.disabled = false;
+            console.log('   Кнопка', i + ':', q.options[i].name, 'правильный?', isCorrect);
+        }
     });
 
     trackInfo.textContent = 'Отрывок произведения';
 
-    // Запускаем музыку с задержкой
     setTimeout(() => {
         playMelody(q.composer);
     }, 200);
 }
 
+// ============================================================
+//  ОБРАБОТКА КЛИКА ПО ВАРИАНТУ
+// ============================================================
 function handleOptionClick(e) {
     const btn = e.currentTarget;
     if (state.isAnswered) return;
@@ -298,6 +301,10 @@ function handleOptionClick(e) {
     setTimeout(() => btn.classList.remove('pressed'), 300);
 
     const isCorrect = btn.dataset.correct === 'true';
+    
+    console.log('🔍 Выбран вариант:', btn.textContent);
+    console.log('   Правильный?', isCorrect);
+    
     state.isAnswered = true;
 
     stopAudio();
@@ -308,6 +315,7 @@ function handleOptionClick(e) {
     allBtns.forEach(b => {
         if (b.dataset.correct === 'true') {
             b.classList.add('correct');
+            console.log('   ✅ Правильный ответ:', b.textContent);
         } else if (b === btn && !isCorrect) {
             b.classList.add('wrong');
         }
@@ -319,7 +327,7 @@ function handleOptionClick(e) {
         feedback.textContent = 'Правильно! Отлично!';
         feedback.className = 'feedback correct';
     } else {
-        const correctName = state.allQuestions[state.currentIndex].options.find(o => o.isCorrect).name;
+        const correctName = state.allQuestions[state.currentIndex].options.find(o => o.isCorrect === true).name;
         feedback.textContent = 'Неверно. Правильный ответ: ' + correctName;
         feedback.className = 'feedback wrong';
     }
