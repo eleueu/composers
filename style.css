@@ -71,7 +71,7 @@ body {
     height: 100dvh;
     max-width: 100%;
     border-radius: 0;
-    padding: 20px 16px 24px;
+    padding: 16px 16px 20px;
     box-shadow: none;
 }
 
@@ -277,7 +277,7 @@ body {
 }
 
 /* ============================================================
-   ИГРОВОЙ ЭКРАН
+   ИГРОВОЙ ЭКРАН — РАСТЯГИВАЕМ НА ВСЮ ВЫСОТУ
    ============================================================ */
 .game-screen {
     display: none;
@@ -287,11 +287,14 @@ body {
     padding: 0;
 }
 
+/* Кнопки вариантов — занимают всё доступное пространство */
 .options {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    margin-top: 4px;
+    flex: 1;
+    justify-content: center;
+    padding: 0;
 }
 
 .btn-option {
@@ -356,6 +359,7 @@ body {
     opacity: 0.7;
 }
 
+/* Название произведения и кнопка "Далее" — прижаты к низу */
 .work-title {
     text-align: center;
     margin-top: 16px;
@@ -365,6 +369,7 @@ body {
     min-height: 26px;
     font-style: italic;
     letter-spacing: 0.2px;
+    flex-shrink: 0;
 }
 
 .btn-next {
@@ -380,6 +385,7 @@ body {
     margin-top: 16px;
     transition: all 0.2s ease;
     display: none;
+    flex-shrink: 0;
 }
 
 .btn-next:active {
@@ -454,10 +460,21 @@ body {
         inset: 8px;
         border-radius: 24px;
     }
+
+    .options {
+        flex: 0 1 auto;
+        justify-content: center;
+        margin-top: 6px;
+    }
+
+    .btn-option {
+        padding: 18px 20px;
+        font-size: 19px;
+    }
 }
 
 /* ============================================================
-   МОБИЛЬНАЯ ВЕРСИЯ (ширина <= 600px) — ВСЯ ВЫСОТА ЭКРАНА
+   МОБИЛЬНАЯ ВЕРСИЯ (ширина <= 600px)
    ============================================================ */
 @media (max-width: 600px) {
     html, body {
@@ -517,7 +534,10 @@ body {
 
     .options {
         gap: 12px;
-        margin-top: 4px;
+        margin-top: 0;
+        flex: 1;
+        justify-content: center;
+        padding: 0 0 8px 0;
     }
 
     .work-title {
