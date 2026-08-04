@@ -1,50 +1,83 @@
 // ============================================================
-//  БАЗА ДАННЫХ: композиторы и пути к аудиофайлам
+//  БАЗА ДАННЫХ
 // ============================================================
-const COMPOSERS_DB = [
+
+// 1. Уникальные композиторы (для списка)
+const COMPOSERS = [
+    'Пётр Ильич Чайковский',
+    'Евгений Дмитриевич Дога',
+    'Людовико Эйнауди',
+    'Ференц Лист',
+    'Сергей Васильевич Рахманинов',
+    'Альфред Гарриевич Шнитке',
+    'Дмитрий Дмитриевич Шостакович',
+    'Георгий Васильевич Свиридов'
+];
+
+// 2. Произведения (связь: файл → композитор + название)
+const WORKS = [
+    // Чайковский
     {
-        name: 'Пётр Ильич Чайковский',
-        audioSrc: 'audio/chaikovsky_oktabr.mp3'
+        composer: 'Пётр Ильич Чайковский',
+        title: 'Октябрь (Осенняя песнь)',
+        file: 'chaikovsky_oktabr.mp3'
     },
     {
-        name: 'Пётр Ильич Чайковский',
-        audioSrc: 'audio/chaikovsky_razmyshlenie.mp3'
+        composer: 'Пётр Ильич Чайковский',
+        title: 'Размышление',
+        file: 'chaikovsky_razmyshlenie.mp3'
+    },
+    // Дога
+    {
+        composer: 'Евгений Дмитриевич Дога',
+        title: 'Граммофон (из к/ф "Мой ласковый и нежный зверь")',
+        file: 'doga_grammofon.mp3'
+    },
+    // Эйнауди
+    {
+        composer: 'Людовико Эйнауди',
+        title: 'Experience',
+        file: 'einaudi_experience.mp3'
+    },
+    // Лист
+    {
+        composer: 'Ференц Лист',
+        title: 'Грёзы любви (Liebesträume)',
+        file: 'list_grezylubvi.mp3'
+    },
+    // Рахманинов
+    {
+        composer: 'Сергей Васильевич Рахманинов',
+        title: 'Концерт для фортепиано №2 (фрагмент)',
+        file: 'rahmaninoff_concert2.mp3'
     },
     {
-        name: 'Евгений Дмитриевич Дога',
-        audioSrc: 'audio/doga_grammofon.mp3'
+        composer: 'Сергей Васильевич Рахманинов',
+        title: 'Прелюдия до-диез минор',
+        file: 'rahmaninoff_preludedodiezminor.mp3'
+    },
+    // Шнитке
+    {
+        composer: 'Альфред Гарриевич Шнитке',
+        title: 'Из "Мёртвых душ" (полька)',
+        file: 'shnitke_polkamertvyedushi.mp3'
     },
     {
-        name: 'Людовико Эйнауди',
-        audioSrc: 'audio/einaudi_experience.mp3'
+        composer: 'Альфред Гарриевич Шнитке',
+        title: 'Из музыки к к/ф "Сказка странствий"',
+        file: 'shnitke_lesskazok.mp3'
     },
+    // Шостакович
     {
-        name: 'Ференц Лист',
-        audioSrc: 'audio/list_grezylubvi.mp3'
+        composer: 'Дмитрий Дмитриевич Шостакович',
+        title: 'Прелюдия ре-мажор',
+        file: 'shostakovich_prelude5remajor.mp3'
     },
+    // Свиридов
     {
-        name: 'Сергей Васильевич Рахманинов',
-        audioSrc: 'audio/rahmaninoff_concert2.mp3'
-    },
-    {
-        name: 'Сергей Васильевич Рахманинов',
-        audioSrc: 'audio/rahmaninoff_preludedodiezminor.mp3'
-    },
-    {
-        name: 'Альфред Гарриевич Шнитке',
-        audioSrc: 'audio/shnitke_lesskazok.mp3'
-    },
-    {
-        name: 'Альфред Гарриевич Шнитке',
-        audioSrc: 'audio/shnitke_polkamertvyedushi.mp3'
-    },
-    {
-        name: 'Дмитрий Дмитриевич Шостакович',
-        audioSrc: 'audio/shostakovich_prelude5remajor.mp3'
-    },
-    {
-        name: 'Георгий Васильевич Свиридов',
-        audioSrc: 'audio/sviridiv_metel.mp3'
+        composer: 'Георгий Васильевич Свиридов',
+        title: 'Вальс из к/ф "Метель"',
+        file: 'sviridiv_metel.mp3'
     }
 ];
 
@@ -54,7 +87,7 @@ const COMPOSERS_DB = [
 const TOTAL_QUESTIONS = 5;
 
 let state = {
-    allQuestions: [],
+    questions: [],
     currentIndex: 0,
     score: 0,
     isAnswered: false,
@@ -80,58 +113,72 @@ const resultTitle = $('resultTitle');
 const resultDetail = $('resultDetail');
 
 // ============================================================
-//  ГЕНЕРАЦИЯ ВОПРОСОВ (исправленная)
+//  ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+// ============================================================
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function getRandomElement(array) {
+    return array[Math.floor(Math.random() * array.length)];
+}
+
+// ============================================================
+//  ГЕНЕРАЦИЯ ВОПРОСОВ
 // ============================================================
 function generateQuestions() {
-    const shuffled = [...COMPOSERS_DB];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-
-    const selected = shuffled.slice(0, TOTAL_QUESTIONS);
-
-    return selected.map((composer) => {
-        const others = COMPOSERS_DB.filter(c => c.name !== composer.name);
-        const shuffledOthers = [...others];
-        for (let i = shuffledOthers.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffledOthers[i], shuffledOthers[j]] = [shuffledOthers[j], shuffledOthers[i]];
+    // Перемешиваем произведения
+    const shuffledWorks = shuffle([...WORKS]);
+    
+    // Берём первые TOTAL_QUESTIONS
+    const selectedWorks = shuffledWorks.slice(0, TOTAL_QUESTIONS);
+    
+    const questions = selectedWorks.map((work) => {
+        // Правильный композитор
+        const correctComposer = work.composer;
+        
+        // Выбираем неправильный вариант (из списка композиторов, не совпадающий с правильным)
+        let wrongComposer = correctComposer;
+        const otherComposers = COMPOSERS.filter(c => c !== correctComposer);
+        
+        if (otherComposers.length > 0) {
+            wrongComposer = getRandomElement(otherComposers);
+        } else {
+            // Если вдруг только один композитор в базе
+            wrongComposer = correctComposer;
         }
-        const wrong = shuffledOthers[0] || COMPOSERS_DB[0];
-
-        const options = [
-            { name: composer.name, isCorrect: true },
-            { name: wrong.name, isCorrect: false }
+        
+        // Создаём варианты ответа
+        let options = [
+            { name: correctComposer, isCorrect: true },
+            { name: wrongComposer, isCorrect: false }
         ];
         
-        for (let i = options.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [options[i], options[j]] = [options[j], options[i]];
-        }
-
+        // Перемешиваем варианты
+        options = shuffle(options);
+        
+        // Находим индекс правильного ответа
         const correctIndex = options.findIndex(opt => opt.isCorrect === true);
-
-        console.log('📝 Сгенерирован вопрос:');
-        console.log('   Правильный композитор:', composer.name);
-        console.log('   Вариант 1:', options[0].name, 'правильный?', options[0].isCorrect);
-        console.log('   Вариант 2:', options[1].name, 'правильный?', options[1].isCorrect);
-        console.log('   Индекс правильного ответа:', correctIndex);
-
+        
         return {
-            composer: composer,
+            work: work,
+            correctComposer: correctComposer,
             options: options,
             correctIndex: correctIndex
         };
     });
+    
+    return questions;
 }
 
 // ============================================================
 //  ОСТАНОВКА АУДИО
 // ============================================================
 function stopAudio() {
-    console.log('⏹ Остановка аудио');
-    
     if (state.animationId) {
         cancelAnimationFrame(state.animationId);
         state.animationId = null;
@@ -144,7 +191,7 @@ function stopAudio() {
             state.audioElement.src = '';
             state.audioElement.load();
         } catch (e) {
-            console.warn('Ошибка при остановке аудио:', e);
+            // Игнорируем
         }
         state.audioElement = null;
     }
@@ -168,75 +215,74 @@ function startPulseAnimation() {
     function animatePulse() {
         const elapsed = (Date.now() - startTime) / 1000;
         const intensity = 0.2 + 0.6 * (0.5 + 0.5 * Math.sin(elapsed * 3));
-        updatePulseRingIntensity(intensity);
+        
+        pulseRing.classList.add('active');
+        
+        if (intensity > 0.7) {
+            pulseRing.className = 'pulse-ring intense';
+        } else if (intensity > 0.4) {
+            pulseRing.className = 'pulse-ring strong';
+        } else {
+            pulseRing.className = 'pulse-ring active';
+        }
+
+        const glow = 30 + intensity * 100;
+        const borderOpacity = 0.2 + intensity * 0.7;
+        const insetGlow = intensity * 120;
+        
+        pulseRing.style.borderColor = 'rgba(41, 128, 255, ' + borderOpacity + ')';
+        pulseRing.style.boxShadow = 
+            'inset 0 0 ' + insetGlow + 'px rgba(41, 128, 255, ' + (0.05 + intensity * 0.2) + '), ' +
+            'inset 0 0 ' + (insetGlow * 1.5) + 'px rgba(41, 128, 255, ' + (0.02 + intensity * 0.1) + '), ' +
+            '0 0 ' + glow + 'px rgba(41, 128, 255, ' + (0.05 + intensity * 0.15) + ')';
+        
+        const alpha = 0.02 + intensity * 0.1;
+        pulseRing.style.background = 'radial-gradient(' +
+            'ellipse at center, ' +
+            'rgba(41, 128, 255, ' + alpha + ') 0%, ' +
+            'rgba(41, 128, 255, ' + (alpha * 0.5) + ') 40%, ' +
+            'transparent 70%' +
+        ')';
+        
         state.animationId = requestAnimationFrame(animatePulse);
     }
     
     animatePulse();
 }
 
-function updatePulseRingIntensity(intensity) {
-    pulseRing.classList.add('active');
-    
-    if (intensity > 0.7) {
-        pulseRing.className = 'pulse-ring intense';
-    } else if (intensity > 0.4) {
-        pulseRing.className = 'pulse-ring strong';
-    } else {
-        pulseRing.className = 'pulse-ring active';
-    }
-
-    const glow = 30 + intensity * 100;
-    const borderOpacity = 0.2 + intensity * 0.7;
-    const insetGlow = intensity * 120;
-    
-    pulseRing.style.borderColor = 'rgba(41, 128, 255, ' + borderOpacity + ')';
-    pulseRing.style.boxShadow = 
-        'inset 0 0 ' + insetGlow + 'px rgba(41, 128, 255, ' + (0.05 + intensity * 0.2) + '), ' +
-        'inset 0 0 ' + (insetGlow * 1.5) + 'px rgba(41, 128, 255, ' + (0.02 + intensity * 0.1) + '), ' +
-        '0 0 ' + glow + 'px rgba(41, 128, 255, ' + (0.05 + intensity * 0.15) + ')';
-    
-    const alpha = 0.02 + intensity * 0.1;
-    pulseRing.style.background = 'radial-gradient(' +
-        'ellipse at center, ' +
-        'rgba(41, 128, 255, ' + alpha + ') 0%, ' +
-        'rgba(41, 128, 255, ' + (alpha * 0.5) + ') 40%, ' +
-        'transparent 70%' +
-    ')';
-}
-
 // ============================================================
 //  ВОСПРОИЗВЕДЕНИЕ АУДИО
 // ============================================================
-function playMelody(composer) {
-    console.log('▶ Воспроизведение:', composer.name);
-    console.log('   Файл:', composer.audioSrc);
+function playMelody(work, onComplete) {
+    const filePath = 'audio/' + work.file;
+    console.log('▶ Воспроизведение:', work.title, '—', work.composer);
+    console.log('   Файл:', filePath);
     
     stopAudio();
     
     setTimeout(() => {
         try {
             const audio = new Audio();
-            audio.src = composer.audioSrc;
+            audio.src = filePath;
             audio.preload = 'auto';
-            
-            console.log('   Создан новый аудиоэлемент');
             
             startPulseAnimation();
             
             audio.addEventListener('canplaythrough', function onCanPlay() {
                 audio.removeEventListener('canplaythrough', onCanPlay);
-                console.log('   Аудио загружено, начинаем воспроизведение');
                 audio.play().then(() => {
                     console.log('✅ Воспроизведение начато');
                     state.audioElement = audio;
+                    if (onComplete) onComplete();
                 }).catch(err => {
                     console.warn('⚠️ Ошибка воспроизведения:', err);
+                    if (onComplete) onComplete();
                 });
             });
             
             audio.addEventListener('error', function(e) {
-                console.warn('⚠️ Ошибка загрузки аудио:', composer.audioSrc);
+                console.warn('⚠️ Ошибка загрузки аудио:', filePath);
+                if (onComplete) onComplete();
             });
             
             audio.load();
@@ -245,6 +291,7 @@ function playMelody(composer) {
         } catch (e) {
             console.error('❌ Критическая ошибка:', e);
             startPulseAnimation();
+            if (onComplete) onComplete();
         }
     }, 100);
 }
@@ -253,15 +300,15 @@ function playMelody(composer) {
 //  ЗАГРУЗКА ВОПРОСА
 // ============================================================
 function loadQuestion(index) {
-    const q = state.allQuestions[index];
+    const q = state.questions[index];
     if (!q) {
         console.warn('Вопрос не найден, индекс:', index);
         return;
     }
 
-    console.log('📝 Загрузка вопроса', index + 1, 'из', state.allQuestions.length);
-    console.log('   Правильный ответ:', q.composer.name);
-    console.log('   correctIndex:', q.correctIndex);
+    console.log('📝 Загрузка вопроса', index + 1, 'из', state.questions.length);
+    console.log('   Произведение:', q.work.title);
+    console.log('   Правильный композитор:', q.correctComposer);
 
     state.isAnswered = false;
     feedback.textContent = '';
@@ -270,23 +317,24 @@ function loadQuestion(index) {
 
     scoreDisplay.textContent = state.score;
 
+    // Показываем название произведения
+    trackInfo.innerHTML = '🎵 <span class="composer-name">' + q.work.title + '</span>';
+
+    // Настраиваем кнопки
     const btns = optionsContainer.querySelectorAll('.btn-option');
     btns.forEach((btn, i) => {
         if (i < q.options.length) {
             btn.textContent = q.options[i].name;
-            const isCorrect = q.options[i].isCorrect === true;
-            btn.dataset.correct = isCorrect ? 'true' : 'false';
+            btn.dataset.correct = q.options[i].isCorrect ? 'true' : 'false';
             btn.className = 'btn-option';
             btn.disabled = false;
-            console.log('   Кнопка', i + ':', q.options[i].name, 'правильный?', isCorrect);
         }
     });
 
-    trackInfo.textContent = 'Отрывок произведения';
-
+    // Запускаем музыку
     setTimeout(() => {
-        playMelody(q.composer);
-    }, 200);
+        playMelody(q.work);
+    }, 300);
 }
 
 // ============================================================
@@ -301,10 +349,6 @@ function handleOptionClick(e) {
     setTimeout(() => btn.classList.remove('pressed'), 300);
 
     const isCorrect = btn.dataset.correct === 'true';
-    
-    console.log('🔍 Выбран вариант:', btn.textContent);
-    console.log('   Правильный?', isCorrect);
-    
     state.isAnswered = true;
 
     stopAudio();
@@ -315,7 +359,6 @@ function handleOptionClick(e) {
     allBtns.forEach(b => {
         if (b.dataset.correct === 'true') {
             b.classList.add('correct');
-            console.log('   ✅ Правильный ответ:', b.textContent);
         } else if (b === btn && !isCorrect) {
             b.classList.add('wrong');
         }
@@ -327,12 +370,12 @@ function handleOptionClick(e) {
         feedback.textContent = 'Правильно! Отлично!';
         feedback.className = 'feedback correct';
     } else {
-        const correctName = state.allQuestions[state.currentIndex].options.find(o => o.isCorrect === true).name;
+        const correctName = state.questions[state.currentIndex].options.find(o => o.isCorrect === true).name;
         feedback.textContent = 'Неверно. Правильный ответ: ' + correctName;
         feedback.className = 'feedback wrong';
     }
 
-    if (state.currentIndex < state.allQuestions.length - 1) {
+    if (state.currentIndex < state.questions.length - 1) {
         btnNext.style.display = 'block';
         btnNext.textContent = 'Следующий вопрос';
     } else {
@@ -341,21 +384,27 @@ function handleOptionClick(e) {
     }
 }
 
+// ============================================================
+//  ПЕРЕХОД К СЛЕДУЮЩЕМУ ВОПРОСУ / РЕЗУЛЬТАТ
+// ============================================================
 function goToNext() {
     state.currentIndex++;
-    if (state.currentIndex < state.allQuestions.length) {
+    if (state.currentIndex < state.questions.length) {
         loadQuestion(state.currentIndex);
     } else {
         showResult();
     }
 }
 
+// ============================================================
+//  РЕЗУЛЬТАТ
+// ============================================================
 function showResult() {
     gameScreen.style.display = 'none';
     resultScreen.style.display = 'flex';
     startScreen.style.display = 'none';
 
-    const total = state.allQuestions.length;
+    const total = state.questions.length;
     finalScore.textContent = state.score + '/' + total;
 
     if (state.score === total) {
@@ -376,12 +425,15 @@ function showResult() {
     }
 }
 
+// ============================================================
+//  СБРОС / СТАРТ
+// ============================================================
 function resetGame() {
     stopAudio();
     state.score = 0;
     state.currentIndex = 0;
     state.isAnswered = false;
-    state.allQuestions = generateQuestions();
+    state.questions = generateQuestions();
 
     scoreDisplay.textContent = '0';
     feedback.textContent = '';
@@ -394,7 +446,7 @@ function resetGame() {
 }
 
 function startGame() {
-    state.allQuestions = generateQuestions();
+    state.questions = generateQuestions();
     state.score = 0;
     state.currentIndex = 0;
 
@@ -421,4 +473,5 @@ document.querySelectorAll('.btn-option').forEach(btn => {
 // ============================================================
 resetGame();
 console.log('🎵 Игра "Угадай композитора" загружена!');
-console.log('📚 В базе ' + COMPOSERS_DB.length + ' композиторов');
+console.log('📚 Композиторов:', COMPOSERS.length);
+console.log('🎶 Произведений:', WORKS.length);

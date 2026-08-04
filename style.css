@@ -50,7 +50,7 @@ body {
 }
 
 /* ============================================================
-   ПУЛЬСИРУЮЩАЯ РАМКА (по внутреннему краю)
+   ПУЛЬСИРУЮЩАЯ РАМКА
    ============================================================ */
 .pulse-ring {
     position: absolute;
@@ -122,7 +122,7 @@ body {
 }
 
 /* ============================================================
-   СЧЁТЧИК (верхний правый угол)
+   СЧЁТЧИК
    ============================================================ */
 .score-header {
     display: flex;
@@ -216,11 +216,18 @@ body {
 
 .track-info {
     text-align: center;
-    margin-bottom: 24px;
-    font-size: 14px;
+    margin-bottom: 12px;
+    font-size: 15px;
     color: #7a7a7a;
     letter-spacing: 0.3px;
-    min-height: 22px;
+    min-height: 24px;
+    font-style: italic;
+}
+
+.track-info .composer-name {
+    color: #2d6bb8;
+    font-style: normal;
+    font-weight: bold;
 }
 
 /* Кнопки вариантов */
