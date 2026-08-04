@@ -295,7 +295,7 @@ body {
 .options {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
     flex: 1;
     justify-content: center;
     padding: 0;
@@ -309,8 +309,8 @@ body {
     font-family: 'CMU Serif', serif;
     padding: 18px 20px;
     border-radius: 16px;
-    font-size: 19px;
-    font-weight: 500;
+    font-size: 22px;              /* было 19px — БОЛЬШЕ */
+    font-weight: 700;             /* было 500 — ЖИРНЫЙ */
     cursor: pointer;
     transition: all 0.25s ease;
     text-align: center;
@@ -369,8 +369,8 @@ body {
 .work-title {
     text-align: center;
     margin-top: 24px;
-    font-size: 20px;
-    font-weight: 600;
+    font-size: 17px;              /* было 20px — МЕНЬШЕ */
+    font-weight: 400;             /* было 600 — ОБЫЧНЫЙ */
     color: #1a1a2e;
     min-height: 30px;
     font-style: italic;
@@ -483,12 +483,16 @@ body {
 
     .btn-option {
         padding: 18px 20px;
-        font-size: 19px;
+        font-size: 22px;
         max-width: 100%;
     }
 
     .btn-next {
         max-width: 100%;
+    }
+
+    .work-title {
+        font-size: 17px;
     }
 }
 
@@ -546,14 +550,15 @@ body {
     }
 
     .btn-option {
-        font-size: 18px;
+        font-size: 20px;             /* было 18px — БОЛЬШЕ */
+        font-weight: 700;            /* ЖИРНЫЙ */
         padding: 17px 18px;
         border-radius: 14px;
         max-width: 80%;
     }
 
     .options {
-        gap: 12px;
+        gap: 14px;                   /* было 12px */
         margin-top: 0;
         flex: 1;
         justify-content: center;
@@ -561,7 +566,8 @@ body {
     }
 
     .work-title {
-        font-size: 18px;
+        font-size: 16px;             /* было 18px — МЕНЬШЕ */
+        font-weight: 400;            /* ОБЫЧНЫЙ */
         margin-top: 20px;
         min-height: 26px;
         padding: 0 4px;
@@ -635,18 +641,20 @@ body {
     }
 
     .btn-option {
-        font-size: 15px;
+        font-size: 18px;             /* было 15px — БОЛЬШЕ */
+        font-weight: 700;            /* ЖИРНЫЙ */
         padding: 14px 14px;
         border-radius: 12px;
         max-width: 85%;
     }
 
     .options {
-        gap: 10px;
+        gap: 12px;                   /* было 10px */
     }
 
     .work-title {
-        font-size: 16px;
+        font-size: 14px;             /* было 16px — МЕНЬШЕ */
+        font-weight: 400;            /* ОБЫЧНЫЙ */
         margin-top: 16px;
         min-height: 22px;
     }
