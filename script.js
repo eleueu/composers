@@ -18,7 +18,7 @@ const COMPOSERS = [
 const WORKS = [
     {
         composer: 'Пётр Ильич Чайковский',
-        title: 'Октябрь (Осенняя песнь)',
+        title: 'Октябрь. «Осенняя песнь» из цикла «Времена года»',
         file: 'chaikovsky_oktabr.mp3'
     },
     {
@@ -28,7 +28,7 @@ const WORKS = [
     },
     {
         composer: 'Евгений Дмитриевич Дога',
-        title: 'Граммофон (из к/ф "Мой ласковый и нежный зверь")',
+        title: 'Вальс «Граммофон»)',
         file: 'doga_grammofon.mp3'
     },
     {
@@ -38,12 +38,12 @@ const WORKS = [
     },
     {
         composer: 'Ференц Лист',
-        title: 'Грёзы любви (Liebesträume)',
+        title: 'Грёзы любви',
         file: 'list_grezylubvi.mp3'
     },
     {
         composer: 'Сергей Васильевич Рахманинов',
-        title: 'Концерт для фортепиано №2 (фрагмент)',
+        title: 'Концерт для фортепиано №2',
         file: 'rahmaninoff_concert2.mp3'
     },
     {
@@ -53,12 +53,12 @@ const WORKS = [
     },
     {
         composer: 'Альфред Гарриевич Шнитке',
-        title: 'Из "Мёртвых душ" (полька)',
+        title: 'Полька из музыки к кинофильму «Мёртвые души»',
         file: 'shnitke_polkamertvyedushi.mp3'
     },
     {
         composer: 'Альфред Гарриевич Шнитке',
-        title: 'Из музыки к к/ф "Сказка странствий"',
+        title: '«Лес сказок»',
         file: 'shnitke_lesskazok.mp3'
     },
     {
@@ -68,7 +68,7 @@ const WORKS = [
     },
     {
         composer: 'Георгий Васильевич Свиридов',
-        title: 'Вальс из к/ф "Метель"',
+        title: 'Вальс из кинофильма «Метель»',
         file: 'sviridiv_metel.mp3'
     }
 ];
