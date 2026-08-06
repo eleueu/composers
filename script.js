@@ -51,13 +51,13 @@ const WORKS = [
     },
     {
         composer: 'Альфред Гарриевич Шнитке',
-        title: 'Полька из музыки к кинофильму «Мёртвые души»',
-        file: 'shnitke_polkamertvyedushi.mp3'
+        title: '«Лес сказок»',
+        file: 'shnitke_lesskazok.mp3'
     },
     {
         composer: 'Альфред Гарриевич Шнитке',
-        title: '«Лес сказок»',
-        file: 'shnitke_lesskazok.mp3'
+        title: 'Полька из музыки к кинофильму «Мёртвые души»',
+        file: 'shnitke_polkamertvvedushi.mp3'
     },
     {
         composer: 'Дмитрий Дмитриевич Шостакович',
@@ -88,67 +88,6 @@ let state = {
 };
 
 // ============================================================
-//  ИНИЦИАЛИЗАЦИЯ АУДИО НА МОБИЛЬНЫХ
-// ============================================================
-let audioContextInitialized = false;
-let preloadedAudios = {};
-
-function initAudioOnInteraction() {
-    if (audioContextInitialized) return;
-    audioContextInitialized = true;
-    
-    try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        if (ctx.state === 'suspended') {
-            ctx.resume();
-        }
-        console.log('Аудиоконтекст инициализирован');
-    } catch (e) {
-        console.warn('Ошибка инициализации аудио:', e);
-    }
-}
-
-// ============================================================
-//  ПРЕДЗАГРУЗКА АУДИОФАЙЛОВ
-// ============================================================
-function preloadAudios() {
-    console.log('Начинаем предзагрузку аудиофайлов...');
-    
-    WORKS.forEach((work) => {
-        const filePath = 'audio/' + work.file;
-        
-        if (preloadedAudios[filePath]) {
-            return;
-        }
-        
-        try {
-            const audio = new Audio();
-            audio.src = filePath;
-            audio.preload = 'auto';
-            audio.load();
-            
-            preloadedAudios[filePath] = audio;
-            
-            audio.addEventListener('canplaythrough', function onReady() {
-                audio.removeEventListener('canplaythrough', onReady);
-                console.log('Предзагружен:', work.file);
-            });
-            
-            audio.addEventListener('error', function(e) {
-                console.warn('Ошибка предзагрузки:', work.file);
-            });
-            
-        } catch (e) {
-            console.warn('Ошибка при предзагрузке:', work.file);
-        }
-    });
-}
-
-// Вешаем на любое касание страницы
-document.addEventListener('touchstart', initAudioOnInteraction, { once: true });
-document.addEventListener('click', initAudioOnInteraction, { once: true });
-
-// ============================================================
 //  DOM-ЭЛЕМЕНТЫ
 // ============================================================
 const $ = id => document.getElementById(id);
@@ -167,6 +106,29 @@ const finalScore = $('finalScore');
 const resultTitle = $('resultTitle');
 const resultDetail = $('resultDetail');
 const workTitle = $('workTitle');
+
+// ============================================================
+//  ИНИЦИАЛИЗАЦИЯ АУДИО
+// ============================================================
+let audioContextInitialized = false;
+
+function initAudioOnInteraction() {
+    if (audioContextInitialized) return;
+    audioContextInitialized = true;
+    
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === 'suspended') {
+            ctx.resume();
+        }
+        console.log('Аудиоконтекст инициализирован');
+    } catch (e) {
+        console.warn('Ошибка инициализации аудио:', e);
+    }
+}
+
+document.addEventListener('touchstart', initAudioOnInteraction, { once: true });
+document.addEventListener('click', initAudioOnInteraction, { once: true });
 
 // ============================================================
 //  ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
@@ -245,6 +207,118 @@ function stopAudio() {
 }
 
 // ============================================================
+//  ПУЛЬСАЦИЯ
+// ============================================================
+function startPulseAnimation() {
+    if (state.animationId) {
+        cancelAnimationFrame(state.animationId);
+    }
+    
+    let startTime = Date.now();
+    
+    function animatePulse() {
+        const elapsed = (Date.now() - startTime) / 1000;
+        
+        const pulse1 = 0.5 + 0.5 * Math.sin(elapsed * 3.2);
+        const pulse2 = 0.5 + 0.5 * Math.sin(elapsed * 1.7 + 1.2);
+        const pulse3 = 0.5 + 0.5 * Math.sin(elapsed * 4.5 + 0.8);
+        
+        const rawIntensity = (pulse1 * 0.6 + pulse2 * 0.3 + pulse3 * 0.1);
+        const intensity = 0.1 + rawIntensity * 0.8;
+        
+        updatePulseRingIntensity(intensity);
+        
+        state.animationId = requestAnimationFrame(animatePulse);
+    }
+    
+    animatePulse();
+}
+
+function updatePulseRingIntensity(intensity) {
+    pulseRing.classList.add('active');
+    
+    const smoothIntensity = intensity * intensity * (3 - 2 * intensity);
+    
+    const minIntensity = 0.05;
+    const maxIntensity = 1.0;
+    const finalIntensity = minIntensity + (maxIntensity - minIntensity) * smoothIntensity;
+    
+    if (finalIntensity > 0.8) {
+        pulseRing.className = 'pulse-ring intense';
+    } else if (finalIntensity > 0.5) {
+        pulseRing.className = 'pulse-ring strong';
+    } else {
+        pulseRing.className = 'pulse-ring active';
+    }
+
+    const glow = 20 + finalIntensity * 160;
+    const borderOpacity = 0.1 + finalIntensity * 0.85;
+    const insetGlow = finalIntensity * 200;
+    
+    pulseRing.style.borderColor = 'rgba(41, 128, 255, ' + borderOpacity + ')';
+    pulseRing.style.boxShadow = 
+        'inset 0 0 ' + insetGlow + 'px rgba(41, 128, 255, ' + (0.03 + finalIntensity * 0.25) + '), ' +
+        'inset 0 0 ' + (insetGlow * 2) + 'px rgba(41, 128, 255, ' + (0.01 + finalIntensity * 0.12) + '), ' +
+        '0 0 ' + glow + 'px rgba(41, 128, 255, ' + (0.03 + finalIntensity * 0.2) + ')';
+    
+    const alpha = 0.01 + finalIntensity * 0.15;
+    pulseRing.style.background = 'radial-gradient(' +
+        'ellipse at center, ' +
+        'rgba(41, 128, 255, ' + alpha + ') 0%, ' +
+        'rgba(41, 128, 255, ' + (alpha * 0.4) + ') 40%, ' +
+        'transparent 70%' +
+    ')';
+}
+
+// ============================================================
+//  ВОСПРОИЗВЕДЕНИЕ АУДИО (используем canplay)
+// ============================================================
+function playMelody(work, onComplete) {
+    const filePath = 'audio/' + work.file;
+    console.log('Воспроизведение:', work.title, '—', work.composer);
+    
+    state.currentWork = work;
+    
+    stopAudio();
+    
+    setTimeout(() => {
+        try {
+            const audio = new Audio();
+            audio.src = filePath;
+            audio.preload = 'auto';
+            
+            state.audioElement = audio;
+            
+            startPulseAnimation();
+            
+            // Используем canplay — начинаем воспроизведение сразу, как только есть данные
+            audio.addEventListener('canplay', function onCanPlay() {
+                audio.removeEventListener('canplay', onCanPlay);
+                audio.play().then(() => {
+                    state.audioElement = audio;
+                    if (onComplete) onComplete();
+                }).catch(err => {
+                    console.warn('Ошибка воспроизведения:', err);
+                    if (onComplete) onComplete();
+                });
+            });
+            
+            audio.addEventListener('error', function(e) {
+                console.warn('Ошибка загрузки аудио:', filePath);
+                if (onComplete) onComplete();
+            });
+            
+            audio.load();
+            
+        } catch (e) {
+            console.error('Критическая ошибка:', e);
+            startPulseAnimation();
+            if (onComplete) onComplete();
+        }
+    }, 100);
+}
+
+// ============================================================
 //  УПРАВЛЕНИЕ ИГРОЙ
 // ============================================================
 function togglePause() {
@@ -316,116 +390,6 @@ function exitGame() {
 }
 
 // ============================================================
-//  ПУЛЬСАЦИЯ
-// ============================================================
-function startPulseAnimation() {
-    if (state.animationId) {
-        cancelAnimationFrame(state.animationId);
-    }
-    
-    let startTime = Date.now();
-    
-    function animatePulse() {
-        const elapsed = (Date.now() - startTime) / 1000;
-        
-        const pulse1 = 0.5 + 0.5 * Math.sin(elapsed * 3.2);
-        const pulse2 = 0.5 + 0.5 * Math.sin(elapsed * 1.7 + 1.2);
-        const pulse3 = 0.5 + 0.5 * Math.sin(elapsed * 4.5 + 0.8);
-        
-        const rawIntensity = (pulse1 * 0.6 + pulse2 * 0.3 + pulse3 * 0.1);
-        const intensity = 0.1 + rawIntensity * 0.8;
-        
-        updatePulseRingIntensity(intensity);
-        
-        state.animationId = requestAnimationFrame(animatePulse);
-    }
-    
-    animatePulse();
-}
-
-function updatePulseRingIntensity(intensity) {
-    pulseRing.classList.add('active');
-    
-    const smoothIntensity = intensity * intensity * (3 - 2 * intensity);
-    
-    const minIntensity = 0.05;
-    const maxIntensity = 1.0;
-    const finalIntensity = minIntensity + (maxIntensity - minIntensity) * smoothIntensity;
-    
-    if (finalIntensity > 0.8) {
-        pulseRing.className = 'pulse-ring intense';
-    } else if (finalIntensity > 0.5) {
-        pulseRing.className = 'pulse-ring strong';
-    } else {
-        pulseRing.className = 'pulse-ring active';
-    }
-
-    const glow = 20 + finalIntensity * 160;
-    const borderOpacity = 0.1 + finalIntensity * 0.85;
-    const insetGlow = finalIntensity * 200;
-    
-    pulseRing.style.borderColor = 'rgba(41, 128, 255, ' + borderOpacity + ')';
-    pulseRing.style.boxShadow = 
-        'inset 0 0 ' + insetGlow + 'px rgba(41, 128, 255, ' + (0.03 + finalIntensity * 0.25) + '), ' +
-        'inset 0 0 ' + (insetGlow * 2) + 'px rgba(41, 128, 255, ' + (0.01 + finalIntensity * 0.12) + '), ' +
-        '0 0 ' + glow + 'px rgba(41, 128, 255, ' + (0.03 + finalIntensity * 0.2) + ')';
-    
-    const alpha = 0.01 + finalIntensity * 0.15;
-    pulseRing.style.background = 'radial-gradient(' +
-        'ellipse at center, ' +
-        'rgba(41, 128, 255, ' + alpha + ') 0%, ' +
-        'rgba(41, 128, 255, ' + (alpha * 0.4) + ') 40%, ' +
-        'transparent 70%' +
-    ')';
-}
-
-// ============================================================
-//  ВОСПРОИЗВЕДЕНИЕ АУДИО
-// ============================================================
-function playMelody(work, onComplete) {
-    const filePath = 'audio/' + work.file;
-    console.log('Воспроизведение:', work.title, '—', work.composer);
-    
-    state.currentWork = work;
-    
-    stopAudio();
-    
-    setTimeout(() => {
-        try {
-            const audio = new Audio();
-            audio.src = filePath;
-            audio.preload = 'auto';
-            
-            startPulseAnimation();
-            
-            audio.addEventListener('canplaythrough', function onCanPlay() {
-                audio.removeEventListener('canplaythrough', onCanPlay);
-                audio.play().then(() => {
-                    state.audioElement = audio;
-                    if (onComplete) onComplete();
-                }).catch(err => {
-                    console.warn('Ошибка воспроизведения:', err);
-                    if (onComplete) onComplete();
-                });
-            });
-            
-            audio.addEventListener('error', function(e) {
-                console.warn('Ошибка загрузки аудио:', filePath);
-                if (onComplete) onComplete();
-            });
-            
-            audio.load();
-            state.audioElement = audio;
-            
-        } catch (e) {
-            console.error('Критическая ошибка:', e);
-            startPulseAnimation();
-            if (onComplete) onComplete();
-        }
-    }, 100);
-}
-
-// ============================================================
 //  ЗАГРУЗКА ВОПРОСА
 // ============================================================
 function loadQuestion(index) {
@@ -473,6 +437,7 @@ function handleOptionClick(e) {
     const isCorrect = btn.dataset.correct === 'true';
     state.isAnswered = true;
 
+    // 🛑 ОСТАНАВЛИВАЕМ МУЗЫКУ СРАЗУ ПОСЛЕ ОТВЕТА
     stopAudio();
 
     const allBtns = optionsContainer.querySelectorAll('.btn-option');
@@ -519,6 +484,7 @@ function goToNext() {
 //  РЕЗУЛЬТАТ
 // ============================================================
 function showResult() {
+    stopAudio();
     gameScreen.style.display = 'none';
     resultScreen.style.display = 'flex';
     startScreen.style.display = 'none';
@@ -569,7 +535,6 @@ function resetGame() {
 
 function startGame() {
     initAudioOnInteraction();
-    preloadAudios();
     
     state.questions = generateQuestions();
     state.score = 0;
